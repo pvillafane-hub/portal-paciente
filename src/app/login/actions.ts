@@ -3,6 +3,8 @@
 import { prisma } from '@/lib/prisma'
 import { verifyPassword, setSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { auditLog } from '@/lib/audit'
+
 
 export async function login(
   prevState: { error?: string } | null,
@@ -26,6 +28,11 @@ export async function login(
   }
 
   setSession(user.id)
+  await auditLog({
+  userId: user.id,
+  action: 'LOGIN',
+})
+
   redirect('/dashboard')
 }
 

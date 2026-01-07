@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation'
 import { writeFile } from 'fs/promises'
 import path from 'path'
 import { getSessionUserId } from '@/lib/auth'
+import { auditLog } from '@/lib/audit'
+
 
 export async function uploadDocument(formData: FormData) {
   const file = formData.get('file') as File
@@ -24,7 +26,7 @@ export async function uploadDocument(formData: FormData) {
   const userId = getSessionUserId()
   if (!userId) redirect('/login')
 
- 
+  
   // Guardar archivo
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)
@@ -34,16 +36,28 @@ export async function uploadDocument(formData: FormData) {
   await writeFile(uploadPath, buffer)
 
   // Guardar metadata
-  await prisma.document.create({
-    data: {
-      filename: file.name,
-      filePath: `/uploads/${fileName}`,
-      docType,
-      facility,
-      studyDate,
-      userId,
-    },
-  })
+ const document = await prisma.document.create({
+  data: {
+    filename: file.name,
+    filePath: `/uploads/${fileName}`,
+    docType,
+    facility,
+    studyDate,
+    userId,
+  },
+})
 
+// Registrar auditlog
+await auditLog({
+  userId,
+  action: 'UPLOAD_DOCUMENT',
+  entityId: document.id,
+  metadata: {
+    filename: document.filename,
+    docType: document.docType,
+    facility: document.facility,
+  },
+})
+  
   redirect('/view')
 }

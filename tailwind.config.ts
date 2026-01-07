@@ -1,27 +1,14 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss";
 
 const config: Config = {
-content: [
- './pages/**/*.{js,ts,jsx,tsx,mdx}',
- './components/**/*.{js,ts,jsx,tsx,mdx}',
- './app/**/*.{js,ts,jsx,tsx,mdx}',
-],
-theme: {
- extend: {
-   fontSize: {
-     'base': '1.125rem', // Large base font for accessibility
-   },
- },
-},
-plugins: [],
-}
-export default config
+  content: [
+    "./src/app/**/*.{js,ts,jsx,tsx}",
+    "./src/components/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
 
-```typescript
-// postcss.config.js
-module.exports = {
-plugins: {
- tailwindcss: {},
- autoprefixer: {},
-},
-}
+export default config;
