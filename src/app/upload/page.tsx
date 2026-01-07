@@ -1,6 +1,12 @@
 import { uploadDocument } from './actions'
+import { redirect } from 'next/navigation'
+import { getSessionUserId } from '@/lib/auth'
+
 
 export default function UploadPage() {
+  const userId = getSessionUserId()
+  if (!userId) redirect('/login')
+    
   return (
     <div className="max-w-xl">
       <h2 className="text-3xl font-bold mb-6">Subir Documento Médico</h2>

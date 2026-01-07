@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { writeFile } from 'fs/promises'
 import path from 'path'
+import { getSessionUserId } from '@/lib/auth'
 
 export async function uploadDocument(formData: FormData) {
   const file = formData.get('file') as File
@@ -20,8 +21,10 @@ export async function uploadDocument(formData: FormData) {
   }
 
   const studyDate = new Date(studyDateRaw)
-  const userId = 'test-user-1'
+  const userId = getSessionUserId()
+  if (!userId) redirect('/login')
 
+ 
   // Guardar archivo
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)

@@ -1,29 +1,48 @@
-import Select from '@/components/Select'
-import Button from '@/components/Button'
+import { prisma } from '@/lib/prisma'
+import { getSessionUserId } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import ShareClient from './share-client'
 
-export default function SharePage() {
+export default async function SharePage({
+  searchParams,
+}: {
+  searchParams: { token?: string }
+}) {
+  const userId = getSessionUserId()
+  if (!userId) redirect('/login')
+
+  const documents = await prisma.document.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-6">Compartir</h2>
+      <h2 className="text-3xl font-bold mb-6">Compartir documento</h2>
 
-      <Select
-        label="Documento"
-        options={[
-          { value: '1', label: 'Laboratorio – Hospital A' },
-          { value: '2', label: 'Rayos X – Centro B' },
-        ]}
-      />
+      {searchParams.token && (
+        <div className="bg-green-50 p-4 rounded border mb-6">
+          <p className="font-medium mb-2">Enlace generado:</p>
+          <input
+           value={`http://localhost:3000/s/${searchParams.token}`}
+           readOnly
+          className="w-full border p-2"
+        />
 
-      <Select
-        label="Expiración"
-        options={[
-          { value: '24', label: '24 horas' },
-          { value: '7', label: '7 días' },
-          { value: '30', label: '30 días' },
-        ]}
-      />
+        </div>
+      )}
 
-      <Button>Generar enlace (mock)</Button>
+      {documents.length === 0 ? (
+        <p className="text-xl text-gray-500">
+          No tienes documentos para compartir.
+        </p>
+      ) : (
+        <ShareClient documents={documents} />
+      )}
     </div>
   )
 }
+
