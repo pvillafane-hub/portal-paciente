@@ -49,5 +49,6 @@ export async function signup(
   })
 
   setSession(user.id)
-  redirect('/dashboard')
+  redirect('/signup/success')
+
 }

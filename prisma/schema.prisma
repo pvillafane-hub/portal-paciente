@@ -14,8 +14,24 @@ model User {
   fullName     String
   createdAt    DateTime @default(now())
 
-  documents Document[]
-  AuditLog  AuditLog[]
+  documents  Document[]
+  AuditLog   AuditLog[]
+  AuthMethod AuthMethod[]
+}
+
+model AuthMethod {
+  id           String    @id @default(uuid())
+  userId       String
+  type         String
+  credentialId String    @unique
+  publicKey    String
+  counter      Int
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("auth_methods")
 }
 
 model Document {
@@ -25,7 +41,7 @@ model Document {
   filePath  String
   docType   String
   facility  String
-  studyDate DateTime
+  studyDate DateTime  @db.Date
   createdAt DateTime  @default(now())
   deletedAt DateTime?
 

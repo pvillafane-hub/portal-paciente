@@ -15,25 +15,45 @@ export default function RootLayout({
       <body className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-white">
         
         {/* HEADER */}
-        <header className="bg-white/90 backdrop-blur border-b">
+        <header className="bg-white/90 backdrop-blur border-b shadow-sm">
           <div className="max-w-6xl mx-auto p-6 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-blue-700">
+            
+            <Link href="/" className="text-2xl font-bold text-blue-700">
               🏥 Portal del Paciente
-            </h1>
+            </Link>
 
             {userId && (
-              <nav className="flex gap-6 text-lg">
-                <Link href="/dashboard" className="hover:underline">
+              <nav className="flex gap-8 text-lg font-medium items-center">
+                
+                <Link
+                  href="/dashboard"
+                  className="hover:text-blue-600 transition"
+                >
                   Inicio
                 </Link>
-                <Link href="/view" className="hover:underline">
+
+                <Link
+                  href="/view"
+                  className="hover:text-blue-600 transition"
+                >
                   Mis documentos
                 </Link>
+
+                <Link
+                  href="/dashboard/security"
+                  className="hover:text-blue-600 transition"
+                >
+                  Seguridad
+                </Link>
+
                 <form action={logout}>
-                  <button className="hover:underline">
+                  <button
+                    className="text-red-600 hover:underline transition"
+                  >
                     Salir
                   </button>
                 </form>
+
               </nav>
             )}
           </div>
