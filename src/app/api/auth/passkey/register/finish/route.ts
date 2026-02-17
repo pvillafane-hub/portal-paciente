@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { origin, rpID } from "@/config/webauthn";
 
+
 export async function POST(req: NextRequest) {
   try {
     const userId = cookies().get("pp_session")?.value;
@@ -27,16 +28,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { credentialID, credentialPublicKey, counter } =
+    const { credential, credentialDeviceType, credentialBackedUp } =
       verification.registrationInfo;
 
     await prisma.authMethod.create({
       data: {
         userId,
         type: "passkey",
-        credentialId: Buffer.from(credentialID).toString("base64"),
-        publicKey: Buffer.from(credentialPublicKey).toString("base64"),
-        counter,
+        credentialId: credential.id,
+        publicKey: Buffer.from(credential.publicKey).toString("base64"),
+        counter: credential.counter,
       },
     });
 

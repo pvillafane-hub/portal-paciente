@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyRegistrationResponse } from "@simplewebauthn/server";
+import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { prisma } from "@/lib/prisma";
 import { origin, rpID } from "@/config/webauthn";
 import { passkeyChallenges } from "@/lib/passkey.challenge.store";
 import { cookies } from "next/headers";
+import { setSession } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   const userId = cookies().get("pp_session")?.value;
@@ -19,29 +20,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Challenge missing" }, { status: 400 });
   }
 
-  const verification = await verifyRegistrationResponse({
+  const method = await prisma.authMethod.findFirst({
+    where: { userId, type: "passkey" },
+  });
+
+  if (!method) {
+    return NextResponse.json({ error: "Passkey not found" }, { status: 400 });
+  }
+
+  const verification = await verifyAuthenticationResponse({
     response: body,
     expectedChallenge,
     expectedOrigin: origin,
     expectedRPID: rpID,
-  });
-
-  if (!verification.verified || !verification.registrationInfo) {
-    return NextResponse.json({ error: "Verification failed" }, { status: 400 });
-  }
-
-  const { credentialID, credentialPublicKey, counter } =
-    verification.registrationInfo;
-
-  await prisma.authMethod.create({
-    data: {
-      userId,
-      type: "passkey",
-      credentialId: Buffer.from(credentialID).toString("base64"),
-      publicKey: Buffer.from(credentialPublicKey).toString("base64"),
-      counter,
+    credential: {
+      id: Buffer.from(method.credentialId, "base64"),
+      publicKey: Buffer.from(method.publicKey, "base64"),
+      counter: method.counter,
     },
   });
+
+  if (!verification.verified) {
+    return NextResponse.json({ error: "Authentication failed" }, { status: 401 });
+  }
+
+  await prisma.authMethod.update({
+    where: { id: method.id },
+    data: {
+      counter: verification.authenticationInfo.newCounter,
+      lastUsedAt: new Date(),
+    },
+  });
+
+  setSession(userId);
 
   passkeyChallenges.delete(userId);
 
