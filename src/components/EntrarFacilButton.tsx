@@ -11,9 +11,13 @@ export default function EntrarFacilButton() {
     try {
       setLoading(true);
 
+      // 1️⃣ Start
       const optionsRes = await fetch(
         "/api/auth/passkey/register/start",
-        { method: "POST" }
+        {
+          method: "POST",
+          credentials: "include", // 👈 IMPORTANTE
+        }
       );
 
       if (!optionsRes.ok) {
@@ -22,18 +26,23 @@ export default function EntrarFacilButton() {
 
       const options = await optionsRes.json();
 
+      // 2️⃣ WebAuthn browser
       const attestation = await startRegistration(options);
 
+      // 3️⃣ Finish
       const verifyRes = await fetch(
         "/api/auth/passkey/register/finish",
         {
           method: "POST",
+          credentials: "include", // 👈 TAMBIÉN AQUÍ
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(attestation),
         }
       );
 
       if (!verifyRes.ok) {
+        const error = await verifyRes.json();
+        console.error(error);
         throw new Error("Falló la verificación");
       }
 

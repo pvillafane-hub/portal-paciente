@@ -2,15 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateRegistrationOptions } from "@simplewebauthn/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
-import { rpID, rpName } from "@/config/webauthn";
-import { passkeyChallenges } from "@/lib/passkey.challenge.store";
+import { rpID, origin, rpName } from "@/config/webauthn";
 
 export async function POST(req: NextRequest) {
   try {
     const userId = cookies().get("pp_session")?.value;
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const user = await prisma.user.findUnique({
@@ -18,16 +20,16 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
     }
-
-    // 🔐 userID ahora debe ser Uint8Array
-    const userID = new TextEncoder().encode(user.id);
 
     const options = await generateRegistrationOptions({
       rpID,
       rpName,
-      userID,
+      userID: new TextEncoder().encode(user.id), // 👈 IMPORTANTE
       userName: user.email,
       userDisplayName: user.fullName,
       attestationType: "none",
@@ -37,10 +39,16 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // ✅ GUARDAMOS EL CHALLENGE
-    passkeyChallenges.set(user.id, options.challenge);
+    const response = NextResponse.json(options);
 
-    return NextResponse.json(options);
+    // 🔐 Guardamos challenge en cookie temporal
+    response.cookies.set("passkey_challenge", options.challenge, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+    });
+
+    return response;
   } catch (err) {
     console.error("Register start error:", err);
     return NextResponse.json(
