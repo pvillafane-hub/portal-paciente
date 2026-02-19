@@ -6,19 +6,12 @@ import { origin, rpID } from "@/config/webauthn";
 
 export async function POST(req: NextRequest) {
   try {
-    const userId = cookies().get("pp_session")?.value;
+    console.log("=== REGISTER FINISH HIT ===");
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    // 🔐 Leer challenge desde cookie
     const challenge = cookies().get("passkey_challenge")?.value;
 
     if (!challenge) {
+      console.log("❌ Challenge missing");
       return NextResponse.json(
         { error: "Challenge missing" },
         { status: 400 }
@@ -35,6 +28,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!verification.verified || !verification.registrationInfo) {
+      console.log("❌ Registration verification failed");
       return NextResponse.json(
         { error: "Verification failed" },
         { status: 400 }
@@ -43,25 +37,45 @@ export async function POST(req: NextRequest) {
 
     const { credential } = verification.registrationInfo;
 
+    const credentialIdBase64 = credential.id;
+
+    const publicKeyBase64 =
+      Buffer.from(credential.publicKey).toString("base64");
+
+    const user = await prisma.user.findFirst({
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!user) {
+      console.log("❌ No user found");
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 400 }
+      );
+    }
+
+    console.log("✅ Saving credential to DB:", credentialIdBase64);
+
     await prisma.authMethod.create({
       data: {
-        userId,
+        userId: user.id,
         type: "passkey",
-        credentialId: Buffer.from(credential.id).toString("base64"),
-        publicKey: Buffer.from(credential.publicKey).toString("base64"),
+        credentialId: credentialIdBase64,
+        publicKey: publicKeyBase64,
         counter: credential.counter,
       },
     });
 
-    // 🧹 Borrar challenge
     const response = NextResponse.json({ ok: true });
+
     response.cookies.delete("passkey_challenge");
+
+    console.log("✅ Registration saved successfully");
 
     return response;
 
   } catch (err) {
-    console.error("Register finish error:", err);
-
+    console.error("🔥 REGISTER FINISH ERROR:", err);
     return NextResponse.json(
       { error: "Internal error" },
       { status: 500 }

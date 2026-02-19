@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import EntrarFacilButton from "@/components/EntrarFacilButton";
+import EntrarFacilLoginButton from "@/components/EntrarFacilLoginButton";
 
 export default function LandingPage() {
   return (
@@ -24,7 +24,7 @@ export default function LandingPage() {
 
           {/* ENTRAR FÁCIL */}
           <div className="flex flex-col items-center gap-3">
-            <EntrarFacilButton />
+            <EntrarFacilLoginButton />
 
             <p className="text-base text-gray-700">
               Acceso seguro con huella o rostro.
