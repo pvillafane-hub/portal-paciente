@@ -47,3 +47,11 @@ public/uploads/
 
 # database backups
 *.sql
+
+# Backups y archivos locales
+*.dump
+*.zip
+*.sql
+backup_*
+portal_paciente_backup.sql
+

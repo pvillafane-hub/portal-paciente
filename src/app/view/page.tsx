@@ -45,7 +45,7 @@ export default async function ViewPage({
 
                 <p className="text-base text-gray-500">
                   Fecha del estudio:{' '}
-                  {new Date(doc.studyDate).toLocaleDateString('es-PR')}
+                  {doc.studyDate.split('-').reverse().join('/')}
                 </p>
               </div>
 

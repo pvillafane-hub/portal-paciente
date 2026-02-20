@@ -41,7 +41,7 @@ model Document {
   filePath  String
   docType   String
   facility  String
-  studyDate DateTime  @db.Date
+  studyDate String
   createdAt DateTime  @default(now())
   deletedAt DateTime?
 
