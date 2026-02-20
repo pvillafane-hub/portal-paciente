@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import crypto from 'crypto'
-import { getSessionUserId } from '@/lib/auth'
 
 let prisma: any
 
@@ -24,7 +23,8 @@ export default async function handler(
     const db = await getPrisma()
 
     const { documentId, days } = req.body
-    const userId = getSessionUserId(req)
+
+    const userId = req.cookies.userId
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' })
