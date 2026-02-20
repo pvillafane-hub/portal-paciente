@@ -8,7 +8,7 @@ type Document = {
   filename: string
   docType: string
   facility: string
-  studyDate: Date
+  studyDate: string
 }
 
 export default function ShareClient({
