@@ -50,7 +50,7 @@ export default function ViewPage() {
     }
   }
 
-  const deleted = searchParams.get('deleted')
+  const deleted = searchParams?.get('deleted')
 
   return (
     <div className="max-w-5xl mx-auto">
