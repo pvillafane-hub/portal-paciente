@@ -1,22 +1,43 @@
-import { uploadDocument } from './actions'
-import { redirect } from 'next/navigation'
-import { getSessionUserId } from '@/lib/auth'
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 export default function UploadPage() {
-  const userId = getSessionUserId()
-  if (!userId) redirect('/login')
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setLoading(true)
+
+    const formData = new FormData(e.currentTarget)
+
+    const res = await fetch('/api/upload/create', {
+      method: 'POST',
+      body: formData,
+    })
+
+    if (res.ok) {
+      router.push('/view')
+    } else {
+      const data = await res.json()
+      alert(data.error || 'Error subiendo documento')
+    }
+
+    setLoading(false)
+  }
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-white/90 backdrop-blur rounded-2xl p-8 shadow-sm">
-        
+
         <h2 className="text-3xl font-bold mb-8">
           Subir Documento Médico
         </h2>
 
-        <form action={uploadDocument} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
 
-          {/* ARCHIVO */}
           <label className="block text-lg font-semibold">
             Archivo
             <input
@@ -28,7 +49,6 @@ export default function UploadPage() {
             />
           </label>
 
-          {/* TIPO DE DOCUMENTO */}
           <label className="block text-lg font-semibold">
             Tipo de documento
             <select
@@ -46,7 +66,6 @@ export default function UploadPage() {
             </select>
           </label>
 
-          {/* FACILIDAD */}
           <label className="block text-lg font-semibold">
             Facilidad / Dónde se realizó
             <input
@@ -58,7 +77,6 @@ export default function UploadPage() {
             />
           </label>
 
-          {/* FECHA */}
           <label className="block text-lg font-semibold">
             Fecha del estudio
             <input
@@ -71,9 +89,10 @@ export default function UploadPage() {
 
           <button
             type="submit"
+            disabled={loading}
             className="bg-blue-600 text-white p-4 rounded-xl text-2xl font-semibold w-full hover:bg-blue-700 transition"
           >
-            Guardar Documento
+            {loading ? 'Guardando...' : 'Guardar Documento'}
           </button>
 
         </form>
