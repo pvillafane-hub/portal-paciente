@@ -1,7 +1,18 @@
-import { prisma } from '@/lib/prisma'
-import { getSessionUserId } from '@/lib/auth'
+export const dynamic = 'force-dynamic'
+
 import { redirect } from 'next/navigation'
 import ShareClient from './share-client'
+import { getSessionUserId } from '@/lib/auth'
+
+let prisma: any
+
+async function getPrisma() {
+  if (!prisma) {
+    const { PrismaClient } = await import('@prisma/client')
+    prisma = new PrismaClient()
+  }
+  return prisma
+}
 
 export default async function SharePage({
   searchParams,
@@ -11,7 +22,9 @@ export default async function SharePage({
   const userId = getSessionUserId()
   if (!userId) redirect('/login')
 
-  const rawDocuments = await prisma.document.findMany({
+  const db = await getPrisma()
+
+  const documents = await db.document.findMany({
     where: {
       userId,
       deletedAt: null,
@@ -19,39 +32,12 @@ export default async function SharePage({
     orderBy: { createdAt: 'desc' },
   })
 
-  const documents = rawDocuments.map(doc => ({
-    id: doc.id,
-    filename: doc.filename,
-    docType: doc.docType,
-    facility: doc.facility,
-    studyDate: doc.studyDate, // 👈 ya es string
-  }))
-
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white/90 backdrop-blur rounded-2xl p-8 shadow-sm">
-
         <h2 className="text-3xl font-bold mb-8">
           Compartir documento
         </h2>
-
-        {searchParams.token && (
-          <div className="bg-green-50 border border-green-200 p-4 rounded-xl mb-8">
-            <p className="font-semibold text-lg mb-2">
-              Enlace generado:
-            </p>
-
-            <input
-              value={`http://localhost:3000/s/${searchParams.token}`}
-              readOnly
-              className="w-full border p-3 rounded-lg text-lg"
-            />
-
-            <p className="text-gray-600 mt-2">
-              Copia este enlace y compártelo con tu médico o familiar.
-            </p>
-          </div>
-        )}
 
         {documents.length === 0 ? (
           <p className="text-xl text-gray-500">
@@ -60,7 +46,6 @@ export default async function SharePage({
         ) : (
           <ShareClient documents={documents} />
         )}
-
       </div>
     </div>
   )
