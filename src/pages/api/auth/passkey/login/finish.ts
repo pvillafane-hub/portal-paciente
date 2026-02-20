@@ -1,6 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { verifyAuthenticationResponse } from '@simplewebauthn/server'
-import { prisma } from '@/lib/prisma'
+
+let prisma: any
+
+async function getPrisma() {
+  if (!prisma) {
+    const { PrismaClient } = await import('@prisma/client')
+    prisma = new PrismaClient()
+  }
+  return prisma
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,15 +20,16 @@ export default async function handler(
   }
 
   try {
-    const body = req.body
+    const db = await getPrisma()
 
+    const body = req.body
     const expectedChallenge = req.cookies.passkey_challenge
 
     if (!expectedChallenge) {
       return res.status(400).json({ error: 'Challenge missing' })
     }
 
-    const method = await prisma.authMethod.findFirst({
+    const method = await db.authMethod.findFirst({
       where: { credentialId: body.id },
     })
 
@@ -46,7 +56,7 @@ export default async function handler(
       return res.status(400).json({ error: 'Verification failed' })
     }
 
-    await prisma.authMethod.update({
+    await db.authMethod.update({
       where: { id: method.id },
       data: {
         counter: verification.authenticationInfo.newCounter,
