@@ -20,7 +20,7 @@ export default function ShareClient({
 
   async function handleSubmit(formData: FormData) {
     const result = await createShareLink(null, formData)
-    if (result?.token) {
+    if (result && 'token' in result) {
       setLink(`${window.location.origin}/s/${result.token}`)
     }
   }
