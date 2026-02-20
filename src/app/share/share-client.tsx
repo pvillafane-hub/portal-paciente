@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { createShareLink } from './actions'
 
 type Document = {
   id: string
@@ -17,19 +16,46 @@ export default function ShareClient({
   documents: Document[]
 }) {
   const [link, setLink] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   async function handleSubmit(formData: FormData) {
-    const result = await createShareLink(null, formData)
-    if (result && 'token' in result) {
-      setLink(`${window.location.origin}/s/${result.token}`)
+    try {
+      setLoading(true)
+
+      const res = await fetch('/api/share/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentId: formData.get('documentId'),
+          days: Number(formData.get('days')),
+        }),
+      })
+
+      const result = await res.json()
+
+      if (result.token) {
+        setLink(`${window.location.origin}/s/${result.token}`)
+      } else if (result.error) {
+        alert(result.error)
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Error generando enlace')
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <div>
-      <form action={handleSubmit} className="space-y-8">
-
-        {/* DOCUMENTO */}
+      <form
+        onSubmit={async e => {
+          e.preventDefault()
+          const formData = new FormData(e.currentTarget)
+          await handleSubmit(formData)
+        }}
+        className="space-y-8"
+      >
         <label className="block text-lg font-semibold">
           Documento a compartir
           <select
@@ -47,7 +73,6 @@ export default function ShareClient({
           </select>
         </label>
 
-        {/* EXPIRACIÓN */}
         <label className="block text-lg font-semibold">
           Expiración del enlace
           <select
@@ -63,9 +88,10 @@ export default function ShareClient({
 
         <button
           type="submit"
+          disabled={loading}
           className="bg-green-600 text-white p-4 rounded-xl text-2xl font-semibold w-full hover:bg-green-700 transition"
         >
-          Generar enlace
+          {loading ? 'Generando...' : 'Generar enlace'}
         </button>
       </form>
 
