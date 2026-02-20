@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { prisma } from "@/lib/prisma";
-import { origin, rpID } from "@/config/webauthn";
+// import { origin, rpID } from "@/config/webauthn";
 import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
@@ -48,7 +48,10 @@ export async function POST(req: NextRequest) {
     }
 
     console.log("✅ Passkey found in DB");
-
+    
+    const origin = process.env.NEXT_PUBLIC_APP_URL!;
+    const rpID = new URL(origin).hostname;
+    
     const verification = await verifyAuthenticationResponse({
       response: body,
       expectedChallenge,
