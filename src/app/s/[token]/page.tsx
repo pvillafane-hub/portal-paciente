@@ -1,14 +1,25 @@
 export const dynamic = 'force-dynamic'
 
-import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
+
+let prisma: any
+
+async function getPrisma() {
+  if (!prisma) {
+    const { PrismaClient } = await import('@prisma/client')
+    prisma = new PrismaClient()
+  }
+  return prisma
+}
 
 export default async function SharedDocumentPage({
   params,
 }: {
   params: { token: string }
 }) {
-  const share = await prisma.shareLink.findUnique({
+  const db = await getPrisma()
+
+  const share = await db.shareLink.findUnique({
     where: { token: params.token },
     include: { document: true },
   })
