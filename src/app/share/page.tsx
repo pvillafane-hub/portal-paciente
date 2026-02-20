@@ -11,13 +11,21 @@ export default async function SharePage({
   const userId = getSessionUserId()
   if (!userId) redirect('/login')
 
-  const documents = await prisma.document.findMany({
+  const rawDocuments = await prisma.document.findMany({
     where: {
       userId,
       deletedAt: null,
     },
     orderBy: { createdAt: 'desc' },
   })
+
+  const documents = rawDocuments.map(doc => ({
+    id: doc.id,
+    filename: doc.filename,
+    docType: doc.docType,
+    facility: doc.facility,
+    studyDate: doc.studyDate, // 👈 ya es string
+  }))
 
   return (
     <div className="max-w-4xl mx-auto">
