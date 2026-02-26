@@ -80,8 +80,7 @@ export default async function handler(
       })
     )
 
-    // 🔗 URL pública directa (temporalmente)
-    const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
+  
 
     // 🗂 5️⃣ Guardar documento en DB
     const document = await prisma.document.create({
