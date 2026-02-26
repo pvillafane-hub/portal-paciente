@@ -25,7 +25,7 @@ export default async function handler(
     const userId = session.user.id
 
     // Ahora sí puedes crear el upload
-    const upload = await prisma.upload.create({
+    const upload = await prisma.document.create({
       data: {
         userId,
         // demás campos...
