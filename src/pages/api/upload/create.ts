@@ -20,6 +20,10 @@ export default async function handler(
   }
 
   try {
+
+    console.log('HEADERS COOKIE:', req.headers.cookie)
+    console.log('RAW HEADERS:', req.headers)
+
     // 🔐 1️⃣ Validar sesión
     const cookieHeader = req.headers.cookie || ''
     const sessionId = cookieHeader
