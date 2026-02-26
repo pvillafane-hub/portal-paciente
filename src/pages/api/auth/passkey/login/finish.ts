@@ -68,7 +68,13 @@ export default async function handler(
       'Set-Cookie',
       `passkey_challenge=; Path=/; Expires=${new Date(0).toUTCString()}`
     )
-
+    res.setHeader(
+      'Set-Cookie',
+       [
+         `userId=${method.userId}; Path=/; HttpOnly; Secure; SameSite=Lax`,
+         `passkey_challenge=; Path=/; Expires=${new Date(0).toUTCString()}`
+       ]
+     )
     return res.status(200).json({ ok: true })
   } catch (err) {
     console.error('LOGIN FINISH ERROR:', err)
