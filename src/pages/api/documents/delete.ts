@@ -41,16 +41,20 @@ export default async function handler(
     }
 
     // Extraer Key de la URL S3
-    const url = new URL(document.filePath)
-    const key = url.pathname.substring(1) // quitar el slash inicial
+    let key: string | null = null;
 
-    // Eliminar de S3
-    await s3.send(
-      new DeleteObjectCommand({
+// Solo intentar borrar en S3 si es URL absoluta
+   if (document.filePath.startsWith("http")) {
+     const url = new URL(document.filePath);
+     key = url.pathname.substring(1);
+
+     await s3.send(
+       new DeleteObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: key,
       })
-    )
+    );
+   }
 
     // Eliminar de DB
     await prisma.document.delete({
