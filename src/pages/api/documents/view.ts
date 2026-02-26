@@ -1,33 +1,23 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from '@/lib/prisma'
-import formidable from 'formidable'
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { s3 } from "@/lib/s3";
-import { randomUUID } from "crypto";
-import fs from "fs";
-
-// ⚠️ Necesario para usar formidable en Next.js
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
+import type { NextApiRequest, NextApiResponse } from "next"
+import { prisma } from "@/lib/prisma"
+import { s3 } from "@/lib/s3"
+import { GetObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' })
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" })
   }
 
   try {
-
     // 🔐 1️⃣ Validar sesión
     const sessionId = req.cookies.pp_session
 
     if (!sessionId) {
-      return res.status(401).json({ error: 'Unauthorized - No session' })
+      return res.status(401).json({ error: "Unauthorized - No session" })
     }
 
     const session = await prisma.session.findUnique({
@@ -35,70 +25,43 @@ export default async function handler(
     })
 
     if (!session || session.expiresAt < new Date()) {
-      return res.status(401).json({ error: 'Invalid or expired session' })
+      return res.status(401).json({ error: "Invalid or expired session" })
     }
 
-    const userId = session.userId
+    // 📄 2️⃣ Obtener ID del documento
+    let id = req.query.id
 
-    // 📦 2️⃣ Procesar FormData con formidable
-    const form = formidable({
-      multiples: false,
-      keepExtensions: true,
+    if (Array.isArray(id)) {
+      id = id[0]
+    }
+
+    if (!id) {
+      return res.status(400).json({ error: "Document ID required" })
+    }
+
+    // 📄 3️⃣ Buscar documento
+    const document = await prisma.document.findUnique({
+      where: { id },
     })
 
-    const [fields, files] = await form.parse(req)
-
-    const file = files.file?.[0]
-
-    if (!file) {
-      return res.status(400).json({ error: 'File is required' })
+    if (!document || document.userId !== session.userId) {
+      return res.status(404).json({ error: "Document not found" })
     }
 
-    const filename = file.originalFilename || file.newFilename
-
-    const docType = fields.docType?.toString() || ''
-    const facility = fields.facility?.toString() || ''
-    const studyDate = fields.studyDate?.toString() || ''
-
-    if (!docType || !facility || !studyDate) {
-      return res.status(400).json({ error: 'Missing required fields' })
-    }
-
-    // 📥 3️⃣ Leer archivo temporal creado por formidable
-    const fileBuffer = fs.readFileSync(file.filepath)
-
-    // 📌 Generar key único en S3
-    const key = `${userId}/${randomUUID()}-${filename}`
-
-    // ☁️ 4️⃣ Subir a S3
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: key,
-        Body: fileBuffer,
-        ContentType: file.mimetype || "application/octet-stream",
-      })
-    )
-
-    // 🔗 URL pública directa (temporalmente)
-    const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
-
-    // 🗂 5️⃣ Guardar documento en DB
-    const document = await prisma.document.create({
-      data: {
-        userId,
-        filename,
-        filePath: fileUrl,
-        docType,
-        facility,
-        studyDate,
-      },
+    // ☁️ 4️⃣ Generar Signed URL
+    const command = new GetObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME!,
+      Key: document.filePath, // 🔥 SOLO EL KEY
     })
 
-    return res.status(200).json(document)
+    const signedUrl = await getSignedUrl(s3, command, {
+      expiresIn: 60,
+    })
+
+    return res.status(200).json({ url: signedUrl })
 
   } catch (error) {
-    console.error('UPLOAD CREATE ERROR:', error)
-    return res.status(500).json({ error: 'Internal Server Error' })
+    console.error("VIEW DOCUMENT ERROR:", error)
+    return res.status(500).json({ error: "Internal Server Error" })
   }
 }
