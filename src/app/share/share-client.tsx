@@ -34,7 +34,7 @@ export default function ShareClient({
       const result = await res.json()
 
       if (result.token) {
-        setLink(`${window.location.origin}/s/${result.token}`)
+        setLink(`${window.location.origin}/share/${result.token}`)
       } else if (result.error) {
         alert(result.error)
       }
