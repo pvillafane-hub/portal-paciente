@@ -64,7 +64,7 @@ export default async function handler(
         lastUsedAt: new Date(),
       },
     })
-
+    console.log('ABOUT TO CREATE SESSION FOR USER:', method.userId)
     // 🔐 CREAR SESIÓN EN DB
     const session = await db.session.create({
       data: {
@@ -74,6 +74,8 @@ export default async function handler(
         ),
       },
     })
+    
+    console.log('SESSION CREATED:', session)
 
     // 🍪 SETEAR COOKIES CORRECTAMENTE
     res.setHeader('Set-Cookie', [
