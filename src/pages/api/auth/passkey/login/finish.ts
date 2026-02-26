@@ -1,15 +1,8 @@
+import { prisma } from '@/lib/prisma'
+
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { verifyAuthenticationResponse } from '@simplewebauthn/server'
 
-let prisma: any
-
-async function getPrisma() {
-  if (!prisma) {
-    const { PrismaClient } = await import('@prisma/client')
-    prisma = new PrismaClient()
-  }
-  return prisma
-}
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,7 +13,7 @@ export default async function handler(
   }
 
   try {
-    const db = await getPrisma()
+    const db = prisma
 
     const body = req.body
     const expectedChallenge = req.cookies.passkey_challenge
