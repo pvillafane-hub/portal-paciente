@@ -21,7 +21,11 @@ export default async function handler(
 
   try {
     // 🔐 1️⃣ Validar sesión
-    const sessionId = req.cookies['pp-session']
+    const cookieHeader = req.headers.cookie || ''
+    const sessionId = cookieHeader
+       .split('; ')
+       .find(row => row.startsWith('pp-session='))
+       ?.split('=')[1]
 
     if (!sessionId) {
       return res.status(401).json({ error: 'Unauthorized - No session' })
