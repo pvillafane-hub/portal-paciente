@@ -53,9 +53,10 @@ export default async function handler(
     })
 
     if (!verification.verified) {
-      return res.status(400).json({ error: 'Verification failed' })
+     return res.status(400).json({ error: 'Verification failed' })
     }
 
+    // Actualizar contador del método
     await db.authMethod.update({
       where: { id: method.id },
       data: {
@@ -64,18 +65,23 @@ export default async function handler(
       },
     })
 
-    res.setHeader(
-      'Set-Cookie',
-      `passkey_challenge=; Path=/; Expires=${new Date(0).toUTCString()}`
-    )
-    res.setHeader(
-      'Set-Cookie',
-       [
-         `userId=${method.userId}; Path=/; HttpOnly; Secure; SameSite=Lax`,
-         `passkey_challenge=; Path=/; Expires=${new Date(0).toUTCString()}`
-       ]
-     )
-    return res.status(200).json({ ok: true })
+    // 🔐 CREAR SESIÓN EN DB
+    const session = await db.session.create({
+      data: {
+        userId: method.userId,
+        expiresAt: new Date(
+         Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 días
+        ),
+      },
+    })
+
+    // 🍪 SETEAR COOKIES CORRECTAMENTE
+    res.setHeader('Set-Cookie', [
+      `pp-session=${session.id}; Path=/; HttpOnly; SameSite=Lax`,
+      `passkey_challenge=; Path=/; Expires=${new Date(0).toUTCString()}`,
+    ])
+
+return res.status(200).json({ ok: true })   
   } catch (err) {
     console.error('LOGIN FINISH ERROR:', err)
     return res.status(500).json({ error: 'Internal error' })
