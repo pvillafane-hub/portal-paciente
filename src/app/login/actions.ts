@@ -27,7 +27,7 @@ export async function login(
     return { error: 'Email o contraseña incorrectos.' }
   }
 
-  setSession(user.id)
+  await setSession(user.id)
   await auditLog({
   userId: user.id,
   action: 'LOGIN',

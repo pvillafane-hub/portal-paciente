@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt'
 import { cookies } from 'next/headers'
+import { prisma } from '@/lib/prisma'
 
 const SESSION_COOKIE = 'pp_session'
 
@@ -11,8 +12,15 @@ export async function verifyPassword(password: string, hash: string) {
   return bcrypt.compare(password, hash)
 }
 
-export function setSession(userId: string) {
-  cookies().set(SESSION_COOKIE, userId, {
+export async function setSession(userId: string) {
+  const session = await prisma.session.create({
+    data: {
+      userId,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    },
+  })
+
+  cookies().set(SESSION_COOKIE, session.id, {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
