@@ -1,5 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
+import formidable from 'formidable'
+import fs from 'fs'
+import path from 'path'
+
+// ⚠️ Necesario para usar formidable en Next.js
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,7 +24,7 @@ export default async function handler(
     const sessionId = req.cookies['pp-session']
 
     if (!sessionId) {
-      return res.status(401).json({ error: 'Unauthorized - No session cookie' })
+      return res.status(401).json({ error: 'Unauthorized - No session' })
     }
 
     const session = await prisma.session.findUnique({
@@ -27,14 +37,33 @@ export default async function handler(
 
     const userId = session.userId
 
-    // 📦 2️⃣ Obtener datos enviados desde el frontend
-    const { filename, filePath, docType, facility, studyDate } = req.body
+    // 📦 2️⃣ Procesar FormData con formidable
+    const form = formidable({
+      multiples: false,
+      uploadDir: path.join(process.cwd(), '/public/uploads'),
+      keepExtensions: true,
+    })
 
-    if (!filename || !filePath || !docType || !facility || !studyDate) {
+    const [fields, files] = await form.parse(req)
+
+    const file = files.file?.[0]
+
+    if (!file) {
+      return res.status(400).json({ error: 'File is required' })
+    }
+
+    const filename = file.originalFilename || file.newFilename
+    const filePath = `/uploads/${file.newFilename}`
+
+    const docType = fields.docType?.toString() || ''
+    const facility = fields.facility?.toString() || ''
+    const studyDate = fields.studyDate?.toString() || ''
+
+    if (!docType || !facility || !studyDate) {
       return res.status(400).json({ error: 'Missing required fields' })
     }
 
-    // 🗂 3️⃣ Crear documento correctamente
+    // 🗂 3️⃣ Crear documento en DB
     const document = await prisma.document.create({
       data: {
         userId,

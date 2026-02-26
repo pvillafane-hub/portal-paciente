@@ -15,6 +15,7 @@ export default function UploadPage() {
 
     const res = await fetch('/api/upload/create', {
       method: 'POST',
+      credentials: 'include',
       body: formData,
     })
 
