@@ -77,7 +77,7 @@ export default async function handler(
 
     // 🍪 SETEAR COOKIES CORRECTAMENTE
     res.setHeader('Set-Cookie', [
-      `pp-session=${session.id}; Path=/; HttpOnly; SameSite=Lax`,
+      `pp_session=${session.id}; Path=/; HttpOnly; SameSite=Lax`,
       `passkey_challenge=; Path=/; Expires=${new Date(0).toUTCString()}`,
     ])
 
