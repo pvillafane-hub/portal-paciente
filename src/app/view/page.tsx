@@ -50,6 +50,28 @@ export default function ViewPage() {
     }
   }
 
+  async function handleView(documentId: string) {
+    try {
+      const res = await fetch(`/api/documents/view?id=${documentId}`)
+      if (!res.ok) {
+        alert('Error cargando documento')
+        return
+      }
+
+      const data = await res.json()
+
+      if (!data.url) {
+        alert('No se pudo generar el acceso al documento')
+        return
+      }
+
+      window.open(data.url, '_blank')
+    } catch (error) {
+      console.error('VIEW ERROR:', error)
+      alert('Error abriendo documento')
+    }
+  }
+
   const deleted = searchParams?.get('deleted')
 
   return (
@@ -98,13 +120,12 @@ export default function ViewPage() {
               </div>
 
               <div className="mt-6 md:mt-0 flex flex-wrap gap-4">
-                <a
-                  href={doc.filePath}
-                  target="_blank"
+                <button
+                  onClick={() => handleView(doc.id)}
                   className="bg-blue-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
                 >
                   Ver documento
-                </a>
+                </button>
 
                 <Link
                   href="/share"

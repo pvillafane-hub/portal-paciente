@@ -88,7 +88,7 @@ export default async function handler(
       data: {
         userId,
         filename,
-        filePath: key,
+        filePath: fileUrl,
         docType,
         facility,
         studyDate,
