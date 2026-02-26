@@ -35,10 +35,15 @@ export default async function handler(
       return res.status(401).json({ error: 'Unauthorized - No session' })
     }
 
+    console.log('SESSION ID:', sessionId)
+
     const session = await prisma.session.findUnique({
       where: { id: sessionId },
     })
-
+    
+    console.log('SESSION FROM DB:', session)
+    console.log('NOW:', new Date())   
+    
     if (!session || session.expiresAt < new Date()) {
       return res.status(401).json({ error: 'Invalid or expired session' })
     }
