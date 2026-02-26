@@ -28,7 +28,7 @@ export default async function handler(
     const cookieHeader = req.headers.cookie || ''
     const sessionId = cookieHeader
        .split('; ')
-       .find(row => row.startsWith('pp-session='))
+       .find(row => row.startsWith('pp_session='))
        ?.split('=')[1]
 
     if (!sessionId) {
