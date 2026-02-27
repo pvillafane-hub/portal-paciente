@@ -40,23 +40,15 @@ export default async function handler(
       return res.status(404).json({ error: 'Document not found' })
     }
 
-    // Extraer Key de la URL S3
-    let key: string | null = null;
-
-// Solo intentar borrar en S3 si es URL absoluta
-   if (document.filePath.startsWith("http")) {
-     const url = new URL(document.filePath);
-     key = url.pathname.substring(1);
-
-     await s3.send(
-       new DeleteObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: key,
+    // 🗑 Eliminar archivo en S3
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: document.filePath,
       })
-    );
-   }
+    )
 
-    // Eliminar de DB
+    // 🗑 Eliminar registro en DB
     await prisma.document.delete({
       where: { id: documentId },
     })
