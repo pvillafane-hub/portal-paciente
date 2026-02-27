@@ -19,11 +19,21 @@ export default async function handler(
   }
 
   try {
-    const userId = req.cookies.user_id;
+    const sessionId = req.cookies.pp_session;
 
-    if (!userId) {
+    if (!sessionId) {
       return res.status(401).json({ error: "Not authenticated" });
     }
+
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!session) {
+      return res.status(401).json({ error: "Invalid session" });
+    }
+
+const userId = session.userId;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
