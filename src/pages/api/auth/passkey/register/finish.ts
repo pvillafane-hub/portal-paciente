@@ -23,17 +23,23 @@ export default async function handler(
   }
 
   try {
-    const body = req.body;
-    const expectedChallenge = req.cookies.passkey_challenge;
-    const userId = req.cookies.user_id;
+    const sessionId = req.cookies.pp_session;
 
-    if (!expectedChallenge || !userId) {
+    if (!sessionId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!session || !session.challenge) {
       return res.status(400).json({ error: "Missing challenge or user" });
     }
 
     const verification = await verifyRegistrationResponse({
-      response: body,
-      expectedChallenge,
+      response: req.body,
+      expectedChallenge: session.challenge,
       expectedOrigin: origin,
       expectedRPID: rpID,
     });
@@ -46,11 +52,19 @@ export default async function handler(
 
     await prisma.authMethod.create({
       data: {
-        userId,
+        userId: session.userId,
         type: "passkey",
-        credentialId: Buffer.from(credential.id).toString("base64"),
+        credentialId: credential.id,
         publicKey: Buffer.from(credential.publicKey).toString("base64"),
         counter: credential.counter,
+      },
+    });
+
+    // 🔥 Limpiar challenge después de usarlo
+    await prisma.session.update({
+      where: { id: sessionId },
+      data: {
+        challenge: { set: null },
       },
     });
 

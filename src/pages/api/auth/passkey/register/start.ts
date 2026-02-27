@@ -27,27 +27,19 @@ export default async function handler(
 
     const session = await prisma.session.findUnique({
       where: { id: sessionId },
+      include: { user: { include: { AuthMethod: true } } },
     });
 
     if (!session) {
       return res.status(401).json({ error: "Invalid session" });
     }
 
-const userId = session.userId;
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { AuthMethod: true },
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    const user = session.user;
 
     const options = await generateRegistrationOptions({
       rpName,
       rpID,
-      userID: new TextEncoder().encode(user.id), // ✅ FIX
+      userID: new TextEncoder().encode(user.id),
       userName: user.email,
       attestationType: "none",
       excludeCredentials: user.AuthMethod.map((method) => ({
@@ -60,10 +52,13 @@ const userId = session.userId;
       },
     });
 
-    res.setHeader(
-      "Set-Cookie",
-      `passkey_challenge=${options.challenge}; HttpOnly; Path=/; SameSite=Lax; Secure`
-    );
+    // 🔥 Guardamos challenge en DB correctamente
+    await prisma.session.update({
+      where: { id: sessionId },
+      data: {
+        challenge: { set: options.challenge }, // 👈 IMPORTANTE
+      },
+    });
 
     return res.status(200).json(options);
   } catch (error) {

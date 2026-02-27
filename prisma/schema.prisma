@@ -12,6 +12,7 @@ model Session {
   userId    String
   createdAt DateTime @default(now())
   expiresAt DateTime
+  challenge String?
 
   user User @relation(fields: [userId], references: [id])
 }
@@ -26,7 +27,7 @@ model User {
   documents  Document[]
   AuditLog   AuditLog[]
   AuthMethod AuthMethod[]
-  sessions     Session[] 
+  sessions   Session[]
 }
 
 model AuthMethod {
