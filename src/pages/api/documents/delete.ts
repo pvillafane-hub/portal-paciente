@@ -47,6 +47,11 @@ export default async function handler(
         Key: document.filePath,
       })
     )
+       
+    // 🧹 Eliminar enlaces compartidos asociados
+    await prisma.shareLink.deleteMany({
+       where: { documentId },
+    })
 
     // 🗑 Eliminar registro en DB
     await prisma.document.delete({
