@@ -62,7 +62,7 @@ const userId = session.userId;
 
     res.setHeader(
       "Set-Cookie",
-      `passkey_challenge=${options.challenge}; HttpOnly; Path=/; SameSite=Lax`
+      `passkey_challenge=${options.challenge}; HttpOnly; Path=/; SameSite=Lax; Secure`
     );
 
     return res.status(200).json(options);
