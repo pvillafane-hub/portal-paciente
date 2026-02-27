@@ -11,12 +11,11 @@ export default function EntrarFacilButton() {
     try {
       setLoading(true);
 
-      // 1️⃣ Start
       const optionsRes = await fetch(
         "/api/auth/passkey/register/start",
         {
           method: "POST",
-          credentials: "include", // 👈 IMPORTANTE
+          credentials: "include",
         }
       );
 
@@ -26,15 +25,16 @@ export default function EntrarFacilButton() {
 
       const options = await optionsRes.json();
 
-      // 2️⃣ WebAuthn browser
-      const attestation = await startRegistration(options);
+      // 🔥 FIX AQUÍ
+      const attestation = await startRegistration({
+        optionsJSON: options,
+      });
 
-      // 3️⃣ Finish
       const verifyRes = await fetch(
         "/api/auth/passkey/register/finish",
         {
           method: "POST",
-          credentials: "include", // 👈 TAMBIÉN AQUÍ
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(attestation),
         }
