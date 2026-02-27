@@ -1,6 +1,9 @@
 export const dynamic = 'force-dynamic'
 
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+import { GetObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { s3 } from '@/lib/s3'
 
 let prisma: any
 
@@ -28,21 +31,16 @@ export default async function SharedDocumentPage({
     notFound()
   }
 
-  return (
-    <div className="max-w-xl mx-auto mt-16 bg-white p-6 rounded-xl border">
-      <h2 className="text-2xl font-bold mb-4">
-        Documento compartido
-      </h2>
+  const key = share.document.filePath
 
-      <p className="mb-4">{share.document.filename}</p>
+  const command = new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME!,
+    Key: key,
+  })
 
-      <a
-        href={share.document.filePath}
-        target="_blank"
-        className="text-blue-600 underline text-lg"
-      >
-        Abrir documento
-      </a>
-    </div>
-  )
+  const signedUrl = await getSignedUrl(s3, command, {
+    expiresIn: 60,
+  })
+
+  redirect(signedUrl)
 }
