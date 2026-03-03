@@ -17,6 +17,7 @@ export default function ShareClient({
 }) {
   const [link, setLink] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   async function handleSubmit(formData: FormData) {
     try {
@@ -35,6 +36,7 @@ export default function ShareClient({
 
       if (result.token) {
         setLink(`${window.location.origin}/s/${result.token}`)
+        setCopied(false) // reset estado
       } else if (result.error) {
         alert(result.error)
       }
@@ -43,6 +45,20 @@ export default function ShareClient({
       alert('Error generando enlace')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleCopy() {
+    if (!link) return
+
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopied(true)
+
+      // desaparecer mensaje luego de 2 segundos
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      alert('No se pudo copiar automáticamente. Copie manualmente.')
     }
   }
 
@@ -109,12 +125,18 @@ export default function ShareClient({
             />
 
             <button
-              onClick={() => navigator.clipboard.writeText(link)}
-              className="bg-blue-600 text-white px-4 rounded-lg text-lg hover:bg-blue-700"
+              onClick={handleCopy}
+              className="bg-blue-600 text-white px-4 rounded-lg text-lg hover:bg-blue-700 transition"
             >
               Copiar
             </button>
           </div>
+
+          {copied && (
+            <div className="mt-3 bg-blue-50 border border-blue-300 text-blue-800 p-3 rounded-xl font-semibold">
+              ✅ Enlace copiado correctamente.
+            </div>
+          )}
 
           <p className="text-gray-600 mt-2">
             Comparte este enlace con tu médico o familiar.

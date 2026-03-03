@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 type Document = {
@@ -17,7 +17,6 @@ export default function ViewPage() {
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const searchParams = useSearchParams()
-  const router = useRouter()
 
   useEffect(() => {
     async function loadDocuments() {
@@ -44,7 +43,6 @@ export default function ViewPage() {
 
     if (res.ok) {
       setDocuments(prev => prev.filter(d => d.id !== documentId))
-      router.refresh()
     } else {
       alert('Error eliminando documento')
     }
@@ -65,7 +63,9 @@ export default function ViewPage() {
         return
       }
 
-      window.open(data.url, '_blank')
+      // ✅ Compatible con iPhone
+      window.location.href = data.url
+
     } catch (error) {
       console.error('VIEW ERROR:', error)
       alert('Error abriendo documento')
