@@ -48,6 +48,8 @@ export default async function handler(
 
     const [ fields, files ] = await form.parse(req)
 
+    console.log("FIELDS:", fields)
+    
     const file = Array.isArray(files.file)
       ? files.file[0]
       : files.file
