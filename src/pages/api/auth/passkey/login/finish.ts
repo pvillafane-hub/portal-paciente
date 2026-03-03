@@ -30,8 +30,8 @@ export default async function handler(
       return res.status(400).json({ error: 'Passkey not found' })
     }
 
-    const origin = process.env.NEXT_PUBLIC_APP_URL!
-    const rpID = new URL(origin).hostname
+    const origin = `https://${req.headers.host}`
+    const rpID = req.headers.host as string
 
     const verification = await verifyAuthenticationResponse({
       response: body,
