@@ -1,6 +1,7 @@
 import { getValidatedSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { prisma } from '@/lib/prisma'
 
 export default async function SecurityPage() {
   const session = await getValidatedSession()
@@ -9,7 +10,9 @@ export default async function SecurityPage() {
   if (!session) {
     redirect('/?auth=required')
   }
-
+  const passkey = await prisma.authMethod.findFirst({
+    where: { userId: session.userId }
+  })
   const userId = session.userId
 
   return (
