@@ -46,7 +46,7 @@ export default async function handler(
       keepExtensions: true,
     })
 
-    const [fields, files] = await form.parse(req)
+    const [ fields, files ] = await form.parse(req)
 
     const file = Array.isArray(files.file)
       ? files.file[0]
@@ -58,9 +58,21 @@ export default async function handler(
 
     const filename = file.originalFilename || file.newFilename
 
-    const docType = fields.docType?.toString() || ''
-    const facility = fields.facility?.toString() || ''
-    const studyDate = fields.studyDate?.toString() || ''
+    const docTypeRaw = fields.docType
+    const facilityRaw = fields.facility
+    const studyDateRaw = fields.studyDate
+
+    const docType = Array.isArray(docTypeRaw)
+      ? docTypeRaw[0]
+      : docTypeRaw || ''
+
+   const facility = Array.isArray(facilityRaw)
+      ? facilityRaw[0]
+      : facilityRaw || ''
+
+   const studyDate = Array.isArray(studyDateRaw)
+      ? studyDateRaw[0]
+      : studyDateRaw || ''
 
     if (!docType || !facility || !studyDate) {
       return res.status(400).json({ error: 'Missing required fields' })
