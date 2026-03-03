@@ -114,6 +114,11 @@ export default function UploadPage() {
         body: formData,
       })
 
+      if (res.status === 401) {
+        router.push('/?auth=expired')
+        return
+      }
+
       if (res.ok) {
         setSaved(true)
         setTimeout(() => {

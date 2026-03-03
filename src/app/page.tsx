@@ -18,7 +18,13 @@ export default function LandingPage() {
             🔐 Debe iniciar sesión para continuar.
           </div>
         )}
-
+        
+        {authRequired === "expired" && (
+         <div className="mb-8 p-6 rounded-2xl border border-red-300 bg-red-50 text-red-800 text-lg font-semibold animate-fadeIn">
+           ⏳ Su sesión ha expirado. Inicie sesión nuevamente.
+         </div>
+        )}
+        
         {/* TÍTULO */}
         <h1 className="text-4xl md:text-5xl font-bold mb-6 text-blue-700">
           Portal del Paciente
