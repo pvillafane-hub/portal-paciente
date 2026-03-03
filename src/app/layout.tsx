@@ -1,14 +1,15 @@
 import './globals.css'
 import Link from 'next/link'
-import { getSessionUserId } from '@/lib/auth'
+import { getValidatedSession } from '@/lib/auth'
 import { logout } from './logout/actions'
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const userId = getSessionUserId()
+  const session = await getValidatedSession()
+  const userId = session?.userId
 
   return (
     <html lang="es">

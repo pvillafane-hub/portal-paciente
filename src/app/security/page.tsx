@@ -1,10 +1,16 @@
-import { getSessionUserId } from '@/lib/auth'
+import { getValidatedSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
 export default async function SecurityPage() {
-  const userId = getSessionUserId()
-  if (!userId) redirect('/login')
+  const session = await getValidatedSession()
+
+  // 🔐 Si no hay sesión válida, redirigir
+  if (!session) {
+    redirect('/?auth=required')
+  }
+
+  const userId = session.userId
 
   return (
     <div className="max-w-2xl">
@@ -13,6 +19,7 @@ export default async function SecurityPage() {
       </h2>
 
       <div className="bg-white border rounded-xl p-6 space-y-6">
+        
         {/* PASSWORD */}
         <section>
           <h3 className="text-xl font-semibold mb-2">
