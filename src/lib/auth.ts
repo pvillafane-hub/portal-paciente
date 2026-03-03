@@ -23,6 +23,7 @@ export async function setSession(userId: string) {
   cookies().set(SESSION_COOKIE, session.id, {
     httpOnly: true,
     sameSite: 'lax',
+    secure: true,   // 👈 AQUÍ lo añades
     path: '/',
   })
 }
@@ -31,6 +32,14 @@ export function getSessionUserId(): string | null {
   return cookies().get(SESSION_COOKIE)?.value ?? null
 }
 
-export function clearSession() {
+export async function clearSession() {
+  const sessionId = cookies().get(SESSION_COOKIE)?.value
+
+  if (sessionId) {
+    await prisma.session.deleteMany({
+      where: { id: sessionId }
+    })
+  }
+
   cookies().delete(SESSION_COOKIE)
 }
