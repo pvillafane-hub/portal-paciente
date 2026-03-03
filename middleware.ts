@@ -3,11 +3,12 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
   const session = request.cookies.get('pp_session')?.value
+  const { pathname } = request.nextUrl
 
   const protectedPaths = ['/upload', '/view', '/dashboard']
 
   const isProtected = protectedPaths.some(path =>
-    request.nextUrl.pathname.startsWith(path)
+    pathname.startsWith(path)
   )
 
   if (isProtected && !session) {
@@ -18,5 +19,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/upload/:path*', '/view/:path*', '/dashboard/:path*'],
+  matcher: ['/upload', '/upload/:path*', '/view', '/view/:path*', '/dashboard', '/dashboard/:path*'],
 }
