@@ -6,7 +6,7 @@ import EntrarFacilLoginButton from "@/components/EntrarFacilLoginButton";
 
 export default function LandingPage() {
   const searchParams = useSearchParams();
-  const authRequired = searchParams.get("auth");
+  const authRequired = searchParams?.get("auth");
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
