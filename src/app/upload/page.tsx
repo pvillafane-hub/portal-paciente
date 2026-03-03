@@ -11,11 +11,13 @@ export default function UploadPage() {
 
   const [errors, setErrors] = useState<{
     file?: string
+    docType?: string
     facility?: string
     studyDate?: string
   }>({})
 
   const fileRef = useRef<HTMLInputElement>(null)
+  const docTypeRef = useRef<HTMLSelectElement>(null)
   const facilityRef = useRef<HTMLInputElement>(null)
   const dateRef = useRef<HTMLInputElement>(null)
 
@@ -25,6 +27,12 @@ export default function UploadPage() {
     if (name === 'file') {
       if (!value || value.size === 0) {
         message = "Por favor, seleccione el documento que desea subir."
+      }
+    }
+
+    if (name === 'docType') {
+      if (!value) {
+        message = "Seleccione el tipo de documento."
       }
     }
 
@@ -56,6 +64,7 @@ export default function UploadPage() {
     const formData = new FormData(e.currentTarget)
 
     const file = formData.get('file') as File
+    const docType = formData.get('docType') as string
     const facility = formData.get('facility') as string
     const studyDate = formData.get('studyDate')
 
@@ -63,6 +72,10 @@ export default function UploadPage() {
 
     if (!file || file.size === 0) {
       newErrors.file = "Por favor, seleccione el documento que desea subir."
+    }
+
+    if (!docType) {
+      newErrors.docType = "Seleccione el tipo de documento."
     }
 
     if (!facility || facility.trim() === "") {
@@ -80,6 +93,9 @@ export default function UploadPage() {
       if (newErrors.file && fileRef.current) {
         fileRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
         fileRef.current.focus()
+      } else if (newErrors.docType && docTypeRef.current) {
+        docTypeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        docTypeRef.current.focus()
       } else if (newErrors.facility && facilityRef.current) {
         facilityRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
         facilityRef.current.focus()
@@ -100,11 +116,9 @@ export default function UploadPage() {
 
       if (res.ok) {
         setSaved(true)
-
         setTimeout(() => {
           router.push('/view')
         }, 2000)
-
       } else {
         setErrors({
           file: "No se pudo guardar el documento. Intente nuevamente."
@@ -130,7 +144,6 @@ export default function UploadPage() {
           Subir Documento Médico
         </h2>
 
-        {/* CONFIRMACIÓN VERDE GRANDE */}
         {saved && (
           <div className="mb-6 p-6 rounded-xl border border-green-300 bg-green-50 text-green-800 text-lg font-semibold animate-fadeIn">
             ✅ Documento guardado correctamente.
@@ -147,15 +160,43 @@ export default function UploadPage() {
               type="file"
               name="file"
               onChange={(e) => validateField('file', e.target.files?.[0])}
-              className={`mt-2 w-full p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 transition ${
+              className={`mt-2 w-full p-4 text-lg border rounded-lg transition ${
                 errors.file
-                  ? "border-red-600 bg-red-50 focus:ring-red-500"
-                  : "border-gray-300 focus:ring-blue-500"
+                  ? "border-red-600 bg-red-50"
+                  : "border-gray-300 focus:ring-2 focus:ring-blue-500"
               }`}
             />
             {errors.file && (
-              <p className="mt-2 text-red-700 text-base font-semibold flex items-center gap-2 animate-fadeIn">
+              <p className="mt-2 text-red-700 font-semibold flex items-center gap-2 animate-fadeIn">
                 ⚠ {errors.file}
+              </p>
+            )}
+          </label>
+
+          {/* TIPO DOCUMENTO */}
+          <label className="block text-lg font-semibold">
+            Tipo de documento
+            <select
+              ref={docTypeRef}
+              name="docType"
+              defaultValue="Laboratorios"
+              onChange={(e) => validateField('docType', e.target.value)}
+              className={`mt-2 w-full p-4 text-lg border rounded-lg transition ${
+                errors.docType
+                  ? "border-red-600 bg-red-50"
+                  : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+              }`}
+            >
+              <option value="Laboratorios">Laboratorios</option>
+              <option value="Rayos X">Rayos X</option>
+              <option value="MRI">MRI</option>
+              <option value="CT">CT</option>
+              <option value="Ultrasonido">Ultrasonido</option>
+              <option value="Otro">Otro</option>
+            </select>
+            {errors.docType && (
+              <p className="mt-2 text-red-700 font-semibold flex items-center gap-2 animate-fadeIn">
+                ⚠ {errors.docType}
               </p>
             )}
           </label>
@@ -169,14 +210,14 @@ export default function UploadPage() {
               name="facility"
               placeholder="Ej. Hospital Manatí Medical"
               onChange={(e) => validateField('facility', e.target.value)}
-              className={`mt-2 w-full p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 transition ${
+              className={`mt-2 w-full p-4 text-lg border rounded-lg transition ${
                 errors.facility
-                  ? "border-red-600 bg-red-50 focus:ring-red-500"
-                  : "border-gray-300 focus:ring-blue-500"
+                  ? "border-red-600 bg-red-50"
+                  : "border-gray-300 focus:ring-2 focus:ring-blue-500"
               }`}
             />
             {errors.facility && (
-              <p className="mt-2 text-red-700 text-base font-semibold flex items-center gap-2 animate-fadeIn">
+              <p className="mt-2 text-red-700 font-semibold flex items-center gap-2 animate-fadeIn">
                 ⚠ {errors.facility}
               </p>
             )}
@@ -190,14 +231,14 @@ export default function UploadPage() {
               type="date"
               name="studyDate"
               onChange={(e) => validateField('studyDate', e.target.value)}
-              className={`mt-2 w-full p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 transition ${
+              className={`mt-2 w-full p-4 text-lg border rounded-lg transition ${
                 errors.studyDate
-                  ? "border-red-600 bg-red-50 focus:ring-red-500"
-                  : "border-gray-300 focus:ring-blue-500"
+                  ? "border-red-600 bg-red-50"
+                  : "border-gray-300 focus:ring-2 focus:ring-blue-500"
               }`}
             />
             {errors.studyDate && (
-              <p className="mt-2 text-red-700 text-base font-semibold flex items-center gap-2 animate-fadeIn">
+              <p className="mt-2 text-red-700 font-semibold flex items-center gap-2 animate-fadeIn">
                 ⚠ {errors.studyDate}
               </p>
             )}
