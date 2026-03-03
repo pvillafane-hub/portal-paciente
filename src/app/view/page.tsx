@@ -16,35 +16,53 @@ type Document = {
 export default function ViewPage() {
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
+
   const searchParams = useSearchParams()
 
   useEffect(() => {
     async function loadDocuments() {
-      const res = await fetch('/api/documents/list')
-      if (res.ok) {
-        const data = await res.json()
-        setDocuments(data)
+      try {
+        const res = await fetch('/api/documents/list')
+        if (res.ok) {
+          const data = await res.json()
+          setDocuments(data)
+        }
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     loadDocuments()
   }, [])
 
   async function handleDelete(documentId: string) {
-    const confirmed = confirm('¿Seguro que deseas eliminar este documento?')
+    const confirmed = window.confirm(
+      '¿Seguro que deseas eliminar este documento?'
+    )
     if (!confirmed) return
 
-    const res = await fetch('/api/documents/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ documentId }),
-    })
+    try {
+      setDeletingId(documentId)
 
-    if (res.ok) {
+      const res = await fetch('/api/documents/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId }),
+      })
+
+      if (!res.ok) throw new Error()
+
       setDocuments(prev => prev.filter(d => d.id !== documentId))
-    } else {
+
+      setMessage('Documento eliminado correctamente.')
+      setTimeout(() => setMessage(null), 3000)
+
+    } catch {
       alert('Error eliminando documento')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -63,11 +81,10 @@ export default function ViewPage() {
         return
       }
 
-      // ✅ Compatible con iPhone
+      // iPhone-safe
       window.location.href = data.url
 
-    } catch (error) {
-      console.error('VIEW ERROR:', error)
+    } catch {
       alert('Error abriendo documento')
     }
   }
@@ -81,6 +98,12 @@ export default function ViewPage() {
         <h2 className="text-3xl font-bold mb-8">
           Mis documentos médicos
         </h2>
+
+        {message && (
+          <div className="bg-green-50 border border-green-300 text-green-800 p-4 rounded-xl mb-6 text-lg font-semibold">
+            ✅ {message}
+          </div>
+        )}
 
         {deleted && (
           <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-xl mb-6 text-lg">
@@ -120,6 +143,7 @@ export default function ViewPage() {
               </div>
 
               <div className="mt-6 md:mt-0 flex flex-wrap gap-4">
+
                 <button
                   onClick={() => handleView(doc.id)}
                   className="bg-blue-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
@@ -136,10 +160,18 @@ export default function ViewPage() {
 
                 <button
                   onClick={() => handleDelete(doc.id)}
-                  className="bg-red-100 text-red-700 px-5 py-3 rounded-xl font-semibold hover:bg-red-200 transition"
+                  disabled={deletingId === doc.id}
+                  className={`px-5 py-3 rounded-xl font-semibold transition ${
+                    deletingId === doc.id
+                      ? 'bg-red-300 text-white'
+                      : 'bg-red-100 text-red-700 hover:bg-red-200'
+                  }`}
                 >
-                  Eliminar
+                  {deletingId === doc.id
+                    ? 'Eliminando...'
+                    : 'Eliminar'}
                 </button>
+
               </div>
             </div>
           ))}
