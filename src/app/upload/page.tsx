@@ -1,100 +1,223 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 export default function UploadPage() {
   const router = useRouter()
+
   const [loading, setLoading] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const [errors, setErrors] = useState<{
+    file?: string
+    facility?: string
+    studyDate?: string
+  }>({})
+
+  const fileRef = useRef<HTMLInputElement>(null)
+  const facilityRef = useRef<HTMLInputElement>(null)
+  const dateRef = useRef<HTMLInputElement>(null)
+
+  function validateField(name: string, value: any) {
+    let message = ''
+
+    if (name === 'file') {
+      if (!value || value.size === 0) {
+        message = "Por favor, seleccione el documento que desea subir."
+      }
+    }
+
+    if (name === 'facility') {
+      if (!value || value.trim() === '') {
+        message = "Escriba el nombre del hospital o clínica."
+      }
+    }
+
+    if (name === 'studyDate') {
+      if (!value) {
+        message = "Seleccione la fecha en que se realizó el estudio."
+      }
+    }
+
+    setErrors(prev => ({
+      ...prev,
+      [name]: message || undefined
+    }))
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+
+    setErrors({})
+    setSaved(false)
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
 
-    const res = await fetch('/api/upload/create', {
-      method: 'POST',
-      credentials: 'include',
-      body: formData,
-    })
+    const file = formData.get('file') as File
+    const facility = formData.get('facility') as string
+    const studyDate = formData.get('studyDate')
 
-    if (res.ok) {
-      router.push('/view')
-    } else {
-      const data = await res.json()
-      alert(data.error || 'Error subiendo documento')
+    const newErrors: typeof errors = {}
+
+    if (!file || file.size === 0) {
+      newErrors.file = "Por favor, seleccione el documento que desea subir."
+    }
+
+    if (!facility || facility.trim() === "") {
+      newErrors.facility = "Escriba el nombre del hospital o clínica."
+    }
+
+    if (!studyDate) {
+      newErrors.studyDate = "Seleccione la fecha en que se realizó el estudio."
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      setLoading(false)
+
+      if (newErrors.file && fileRef.current) {
+        fileRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        fileRef.current.focus()
+      } else if (newErrors.facility && facilityRef.current) {
+        facilityRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        facilityRef.current.focus()
+      } else if (newErrors.studyDate && dateRef.current) {
+        dateRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        dateRef.current.focus()
+      }
+
+      return
+    }
+
+    try {
+      const res = await fetch('/api/upload/create', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      })
+
+      if (res.ok) {
+        setSaved(true)
+
+        setTimeout(() => {
+          router.push('/view')
+        }, 2000)
+
+      } else {
+        setErrors({
+          file: "No se pudo guardar el documento. Intente nuevamente."
+        })
+      }
+
+    } catch {
+      setErrors({
+        file: "Ocurrió un problema inesperado. Intente nuevamente."
+      })
     }
 
     setLoading(false)
   }
 
+  const hasErrors = Object.values(errors).some(Boolean)
+
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-white/90 backdrop-blur rounded-2xl p-8 shadow-sm">
+      <div className="bg-white/95 backdrop-blur rounded-2xl p-8 shadow-md">
 
         <h2 className="text-3xl font-bold mb-8">
           Subir Documento Médico
         </h2>
 
+        {/* CONFIRMACIÓN VERDE GRANDE */}
+        {saved && (
+          <div className="mb-6 p-6 rounded-xl border border-green-300 bg-green-50 text-green-800 text-lg font-semibold animate-fadeIn">
+            ✅ Documento guardado correctamente.
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-8">
 
+          {/* ARCHIVO */}
           <label className="block text-lg font-semibold">
             Archivo
             <input
+              ref={fileRef}
               type="file"
               name="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              required
-              className="mt-2 w-full p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => validateField('file', e.target.files?.[0])}
+              className={`mt-2 w-full p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 transition ${
+                errors.file
+                  ? "border-red-600 bg-red-50 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
             />
+            {errors.file && (
+              <p className="mt-2 text-red-700 text-base font-semibold flex items-center gap-2 animate-fadeIn">
+                ⚠ {errors.file}
+              </p>
+            )}
           </label>
 
-          <label className="block text-lg font-semibold">
-            Tipo de documento
-            <select
-              name="docType"
-              required
-              defaultValue="Laboratorios"
-              className="mt-2 w-full p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Laboratorios">Laboratorios</option>
-              <option value="Rayos X">Rayos X</option>
-              <option value="MRI">MRI</option>
-              <option value="CT">CT</option>
-              <option value="Ultrasonido">Ultrasonido</option>
-              <option value="Otro">Otro</option>
-            </select>
-          </label>
-
+          {/* FACILIDAD */}
           <label className="block text-lg font-semibold">
             Facilidad / Dónde se realizó
             <input
+              ref={facilityRef}
               type="text"
               name="facility"
-              required
               placeholder="Ej. Hospital Manatí Medical"
-              className="mt-2 w-full p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => validateField('facility', e.target.value)}
+              className={`mt-2 w-full p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 transition ${
+                errors.facility
+                  ? "border-red-600 bg-red-50 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
             />
+            {errors.facility && (
+              <p className="mt-2 text-red-700 text-base font-semibold flex items-center gap-2 animate-fadeIn">
+                ⚠ {errors.facility}
+              </p>
+            )}
           </label>
 
+          {/* FECHA */}
           <label className="block text-lg font-semibold">
             Fecha del estudio
             <input
+              ref={dateRef}
               type="date"
               name="studyDate"
-              required
-              className="mt-2 w-full p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => validateField('studyDate', e.target.value)}
+              className={`mt-2 w-full p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 transition ${
+                errors.studyDate
+                  ? "border-red-600 bg-red-50 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
             />
+            {errors.studyDate && (
+              <p className="mt-2 text-red-700 text-base font-semibold flex items-center gap-2 animate-fadeIn">
+                ⚠ {errors.studyDate}
+              </p>
+            )}
           </label>
 
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white p-4 rounded-xl text-2xl font-semibold w-full hover:bg-blue-700 transition"
+            className={`p-4 rounded-xl text-2xl font-semibold w-full transition ${
+              hasErrors
+                ? "bg-red-600 text-white"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            } disabled:opacity-50`}
           >
             {loading ? 'Guardando...' : 'Guardar Documento'}
           </button>
+
+          <p className="text-sm text-gray-600 mt-4">
+            Todos los campos son obligatorios.
+          </p>
 
         </form>
       </div>

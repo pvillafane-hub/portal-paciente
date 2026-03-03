@@ -57,7 +57,7 @@ export default async function handler(
         lastUsedAt: new Date(),
       },
     })
-    console.log('ABOUT TO CREATE SESSION FOR USER:', method.userId)
+    
     // 🔐 CREAR SESIÓN EN DB
     const session = await db.session.create({
       data: {
@@ -67,12 +67,10 @@ export default async function handler(
         ),
       },
     })
-    
-    console.log('SESSION CREATED:', session)
 
     // 🍪 SETEAR COOKIES CORRECTAMENTE
     res.setHeader('Set-Cookie', [
-      `pp_session=${session.id}; Path=/; HttpOnly; SameSite=Lax`,
+      `pp_session=${session.id}; Path=/; HttpOnly; Secure; SameSite=Lax`,
       `passkey_challenge=; Path=/; Expires=${new Date(0).toUTCString()}`,
     ])
 
