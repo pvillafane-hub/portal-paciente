@@ -1,13 +1,23 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import EntrarFacilLoginButton from "@/components/EntrarFacilLoginButton";
 
 export default function LandingPage() {
+  const searchParams = useSearchParams();
+  const authRequired = searchParams.get("auth");
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
+      <div className="bg-white/95 backdrop-blur rounded-3xl p-12 shadow-soft max-w-xl w-full text-center">
 
-      <div className="bg-white/90 backdrop-blur rounded-3xl p-12 shadow-soft max-w-xl w-full text-center">
+        {/* 🔐 MENSAJE DE AUTENTICACIÓN REQUERIDA */}
+        {authRequired === "required" && (
+          <div className="mb-8 p-6 rounded-2xl border border-yellow-300 bg-yellow-50 text-yellow-800 text-lg font-semibold animate-fadeIn">
+            🔐 Debe iniciar sesión para continuar.
+          </div>
+        )}
 
         {/* TÍTULO */}
         <h1 className="text-4xl md:text-5xl font-bold mb-6 text-blue-700">

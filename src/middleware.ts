@@ -12,12 +12,14 @@ export function middleware(request: NextRequest) {
   )
 
   if (isProtected && !session) {
-    return NextResponse.redirect(new URL('/', request.url))
+    const loginUrl = new URL('/', request.url)
+    loginUrl.searchParams.set('auth', 'required')
+    return NextResponse.redirect(loginUrl)
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/upload', '/upload/:path*', '/view', '/view/:path*', '/dashboard', '/dashboard/:path*'],
+  matcher: ['/upload/:path*', '/view/:path*', '/dashboard/:path*'],
 }
