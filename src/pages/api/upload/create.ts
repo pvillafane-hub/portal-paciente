@@ -48,7 +48,9 @@ export default async function handler(
 
     const [fields, files] = await form.parse(req)
 
-    const file = files.file?.[0]
+    const file = Array.isArray(files.file)
+      ? files.file[0]
+      : files.file
 
     if (!file) {
       return res.status(400).json({ error: 'File is required' })
