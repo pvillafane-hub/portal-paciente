@@ -1,20 +1,13 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
 import bcrypt from 'bcrypt'
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== 'POST') {
-    return res.status(405).end()
-  }
-
-  const { email } = req.body
+export async function POST(req: Request) {
+  const { email } = await req.json()
 
   if (!email) {
-    return res.status(200).json({ message: 'OK' })
+    return NextResponse.json({ message: 'OK' })
   }
 
   const user = await prisma.user.findUnique({
@@ -33,12 +26,10 @@ export default async function handler(
       },
     })
 
-    // ⚠ Aquí luego conectamos tu sistema de email
     console.log(
       `RESET LINK: ${process.env.NEXT_PUBLIC_APP_URL}/reset-password/${rawToken}`
     )
   }
 
-  // Siempre devolver 200
-  return res.status(200).json({ message: 'OK' })
+  return NextResponse.json({ message: 'OK' })
 }
