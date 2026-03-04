@@ -96,14 +96,6 @@ export default function LandingPage() {
           </Link>
         </div>
 
-        {/* RECUPERACIÓN */}
-        <p className="text-sm text-gray-600 mt-8">
-          ¿Perdiste tu teléfono o cambiaste de dispositivo?{" "}
-          <Link href="/recovery" className="text-blue-600 underline">
-            Recuperar acceso
-          </Link>
-        </p>
-
         <p className="text-sm text-gray-500 mt-6">
           Tus datos están protegidos. Diseñado para pacientes y cuidadores.
         </p>
