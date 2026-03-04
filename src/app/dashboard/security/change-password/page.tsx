@@ -56,7 +56,7 @@ export default async function ChangePasswordPage() {
       where: { id: user.id },
       data: {
         passwordHash: newHash,
-        passwordChagendAt: new Date(),
+        passwordChangedAt: new Date(),
       },
     })
 
