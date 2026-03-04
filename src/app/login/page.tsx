@@ -18,6 +18,7 @@ export default function LoginPage() {
 
   const [hasPasskey, setHasPasskey] = useState(false)
   const [checkingPasskey, setCheckingPasskey] = useState(false)
+  const [debounceTimeout, setDebounceTimeout] = useState<any>(null)
 
   useEffect(() => {
     if (state?.error) {
@@ -43,7 +44,10 @@ export default function LoginPage() {
   }
 
   async function checkPasskey(email: string) {
-    if (!email.trim()) return
+    if (!email.trim()) {
+      setHasPasskey(false)
+      return
+    }
 
     try {
       setCheckingPasskey(true)
@@ -62,6 +66,20 @@ export default function LoginPage() {
     } finally {
       setCheckingPasskey(false)
     }
+  }
+
+  function handleEmailChange(value: string) {
+    validateField('email', value)
+
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout)
+    }
+
+    const timeout = setTimeout(() => {
+      checkPasskey(value)
+    }, 500)
+
+    setDebounceTimeout(timeout)
   }
 
   async function handlePasskeyRecovery() {
@@ -158,8 +176,7 @@ export default function LoginPage() {
             type="email"
             name="email"
             placeholder="Ej. usuario@email.com"
-            onChange={(e) => validateField('email', e.target.value)}
-            onBlur={(e) => checkPasskey(e.target.value)}
+            onChange={(e) => handleEmailChange(e.target.value)}
             className={`mt-2 w-full p-4 text-lg border rounded-lg focus:ring-2 transition ${
               clientErrors.email
                 ? 'border-red-600 bg-red-50 focus:ring-red-500'
@@ -199,7 +216,6 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* BOTÓN LOGIN */}
         <button
           type="submit"
           className={`w-full p-4 rounded-xl text-2xl font-semibold transition ${
@@ -218,7 +234,13 @@ export default function LoginPage() {
             ¿Olvidó su contraseña?
           </p>
 
-          {hasPasskey && (
+          {checkingPasskey && (
+            <p className="text-center text-gray-500 text-sm">
+              Verificando seguridad...
+            </p>
+          )}
+
+          {hasPasskey && !checkingPasskey && (
             <button
               type="button"
               onClick={handlePasskeyRecovery}
