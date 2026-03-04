@@ -3,6 +3,7 @@
 import { useFormState } from 'react-dom'
 import { login } from './actions'
 import { useRef, useEffect, useState } from 'react'
+import { startAuthentication } from '@simplewebauthn/browser'
 
 export default function LoginPage() {
   const [state, formAction] = useFormState(login, null)
@@ -15,7 +16,9 @@ export default function LoginPage() {
     password?: string
   }>({})
 
-  // 🔎 Si el server devuelve error general, limpiar errores de campo
+  const [hasPasskey, setHasPasskey] = useState(false)
+  const [checkingPasskey, setCheckingPasskey] = useState(false)
+
   useEffect(() => {
     if (state?.error) {
       setClientErrors({})
@@ -37,6 +40,63 @@ export default function LoginPage() {
       ...prev,
       [name]: message || undefined,
     }))
+  }
+
+  async function checkPasskey(email: string) {
+    if (!email.trim()) return
+
+    try {
+      setCheckingPasskey(true)
+
+      const res = await fetch('/api/auth/has-passkey', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await res.json()
+      setHasPasskey(data.hasPasskey)
+    } catch (error) {
+      console.error(error)
+      setHasPasskey(false)
+    } finally {
+      setCheckingPasskey(false)
+    }
+  }
+
+  async function handlePasskeyRecovery() {
+    try {
+      const res = await fetch('/api/auth/passkey/login/start', {
+        method: 'POST',
+        credentials: 'include',
+      })
+
+      if (!res.ok) {
+        alert('No se pudo iniciar autenticación.')
+        return
+      }
+
+      const options = await res.json()
+
+      const authenticationResponse = await startAuthentication(options)
+
+      const verification = await fetch('/api/auth/passkey/login/finish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(authenticationResponse),
+      })
+
+      if (verification.ok) {
+        window.location.href = '/reset-password-direct'
+      } else {
+        alert('Autenticación fallida.')
+      }
+
+    } catch (error) {
+      console.error(error)
+      alert('Error en autenticación.')
+    }
   }
 
   function handleClientValidation(e: React.FormEvent<HTMLFormElement>) {
@@ -82,7 +142,6 @@ export default function LoginPage() {
         onSubmit={handleClientValidation}
         className="space-y-6"
       >
-        {/* 🔴 ERROR GENERAL (credenciales incorrectas) */}
         {state?.error && (
           <div className="bg-red-50 border border-red-300 text-red-800 p-4 rounded-xl text-lg font-semibold">
             ⚠ El correo o la contraseña no son correctos. Verifique la información e intente nuevamente.
@@ -99,9 +158,8 @@ export default function LoginPage() {
             type="email"
             name="email"
             placeholder="Ej. usuario@email.com"
-            onChange={(e) =>
-              validateField('email', e.target.value)
-            }
+            onChange={(e) => validateField('email', e.target.value)}
+            onBlur={(e) => checkPasskey(e.target.value)}
             className={`mt-2 w-full p-4 text-lg border rounded-lg focus:ring-2 transition ${
               clientErrors.email
                 ? 'border-red-600 bg-red-50 focus:ring-red-500'
@@ -141,28 +199,43 @@ export default function LoginPage() {
           )}
         </div>
 
-       {/* BOTÓN */}
-       <button
-         type="submit"
-         className={`w-full p-4 rounded-xl text-2xl font-semibold transition ${
-          hasErrors
-            ? 'bg-red-600 text-white'
-            : 'bg-blue-600 text-white hover:bg-blue-700'
-         }`}
-       >
-        Entrar
-       </button>
+        {/* BOTÓN LOGIN */}
+        <button
+          type="submit"
+          className={`w-full p-4 rounded-xl text-2xl font-semibold transition ${
+            hasErrors
+              ? 'bg-red-600 text-white'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+        >
+          Entrar
+        </button>
 
-       {/* FORGOT PASSWORD */}
-       <p className="text-sm text-gray-600 text-center mt-4">
-         ¿Olvidó su contraseña?{' '}
-         <a
-           href="/forgot-password"
-           className="text-blue-600 underline hover:text-blue-700"
-         >
-          Recuperar acceso
-         </a>
-      </p>
+        {/* RECOVERY SECTION */}
+        <div className="pt-6 border-t space-y-4">
+
+          <p className="text-sm text-gray-600 text-center">
+            ¿Olvidó su contraseña?
+          </p>
+
+          {hasPasskey && (
+            <button
+              type="button"
+              onClick={handlePasskeyRecovery}
+              className="w-full bg-gray-100 border p-3 rounded-xl text-lg hover:bg-gray-200 transition"
+            >
+              🔐 Recuperar con huella o rostro
+            </button>
+          )}
+
+          <a
+            href="/forgot-password"
+            className="block text-center text-blue-600 underline hover:text-blue-700"
+          >
+            📧 Enviar enlace por correo
+          </a>
+
+        </div>
       </form>
     </div>
   )
