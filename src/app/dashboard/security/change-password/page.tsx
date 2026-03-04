@@ -10,7 +10,9 @@ export default async function ChangePasswordPage() {
 
   if (!session) {
     redirect('/?auth=required')
+    return
   }
+  const userId = session.userId
 
   async function changePassword(
     prevState: any,
@@ -35,7 +37,7 @@ export default async function ChangePasswordPage() {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session!.userId },
+      where: { id: userId },
     })
 
     if (!user) {
