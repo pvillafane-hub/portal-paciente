@@ -70,12 +70,23 @@ export async function refreshSession(sessionId: string) {
   })
 }
 
-// 🔐 VALIDAR + RENOVAR AUTOMÁTICAMENTE
+// 🔐 VALIDAR + RENOVAR + INVALIDAR SI CAMBIÓ PASSWORD
 
 export async function getValidatedSession() {
   const session = await getValidSession()
 
   if (!session) return null
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+  })
+
+  if (!user) return null
+
+  // 🔐 INVALIDAR SESIONES SI EL PASSWORD CAMBIÓ
+  if (user.passwordChangedAt && session.createdAt < user.passwordChangedAt) {
+    return null
+  }
 
   // 🔄 Sliding renewal
   await refreshSession(session.id)

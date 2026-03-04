@@ -54,7 +54,10 @@ export default async function ChangePasswordPage() {
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { passwordHash: newHash },
+      data: {
+        passwordHash: newHash,
+        passwordChagendAt: new Date(),
+      },
     })
 
     revalidatePath('/dashboard/security')
