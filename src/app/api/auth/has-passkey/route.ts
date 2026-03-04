@@ -10,16 +10,15 @@ export async function POST(req: Request) {
 
   const user = await prisma.user.findUnique({
     where: { email },
-    include: {
-      AuthMethod: true,
-    },
   })
 
   if (!user) {
     return NextResponse.json({ hasPasskey: false })
   }
 
-  const hasPasskey = user.AuthMethod.length > 0
+  const count = await prisma.authMethod.count({
+    where: { userId: user.id },
+  })
 
-  return NextResponse.json({ hasPasskey })
+  return NextResponse.json({ hasPasskey: count > 0 })
 }
