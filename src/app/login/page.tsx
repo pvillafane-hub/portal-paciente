@@ -150,8 +150,9 @@ export default function LoginPage() {
     state?.error || Object.values(clientErrors).some(Boolean)
 
   return (
-    <div className="max-w-md mx-auto mt-16 bg-white p-8 rounded-2xl shadow-md">
-      <h2 className="text-3xl font-bold mb-6">
+    <div className="w-full max-w-md mx-auto mt-10 md:mt-16 bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+      
+      <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
         Iniciar sesión
       </h2>
 
@@ -162,7 +163,7 @@ export default function LoginPage() {
       >
         {state?.error && (
           <div className="bg-red-50 border border-red-300 text-red-800 p-4 rounded-xl text-lg font-semibold">
-            ⚠ El correo o la contraseña no son correctos. Verifique la información e intente nuevamente.
+            ⚠ El correo o la contraseña no son correctos.
           </div>
         )}
 
@@ -177,7 +178,7 @@ export default function LoginPage() {
             name="email"
             placeholder="Ej. usuario@email.com"
             onChange={(e) => handleEmailChange(e.target.value)}
-            className={`mt-2 w-full p-4 text-lg border rounded-lg focus:ring-2 transition ${
+            className={`mt-2 w-full p-4 text-lg border rounded-xl focus:ring-2 transition min-h-[56px] ${
               clientErrors.email
                 ? 'border-red-600 bg-red-50 focus:ring-red-500'
                 : 'border-gray-300 focus:ring-blue-500'
@@ -203,7 +204,7 @@ export default function LoginPage() {
             onChange={(e) =>
               validateField('password', e.target.value)
             }
-            className={`mt-2 w-full p-4 text-lg border rounded-lg focus:ring-2 transition ${
+            className={`mt-2 w-full p-4 text-lg border rounded-xl focus:ring-2 transition min-h-[56px] ${
               clientErrors.password
                 ? 'border-red-600 bg-red-50 focus:ring-red-500'
                 : 'border-gray-300 focus:ring-blue-500'
@@ -216,26 +217,23 @@ export default function LoginPage() {
           )}
         </div>
 
+        {/* BOTÓN LOGIN */}
         <button
           type="submit"
-          className={`w-full p-4 rounded-xl text-2xl font-semibold transition ${
-            hasErrors
-              ? 'bg-red-600 text-white'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          }`}
+          className="w-full min-h-[56px] p-4 rounded-xl text-xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md active:scale-[0.99] transition"
         >
           Entrar
         </button>
 
-        {/* RECOVERY SECTION */}
-        <div className="pt-6 border-t space-y-4">
+        {/* RECOVERY */}
+        <div className="pt-8 border-t mt-8 space-y-6">
 
-          <p className="text-sm text-gray-600 text-center">
-            ¿Olvidó su contraseña?
+          <p className="text-sm text-gray-500 text-center">
+            ¿Necesita ayuda para acceder?
           </p>
 
           {checkingPasskey && (
-            <p className="text-center text-gray-500 text-sm">
+            <p className="text-center text-gray-400 text-sm">
               Verificando seguridad...
             </p>
           )}
@@ -244,7 +242,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={handlePasskeyRecovery}
-              className="w-full bg-gray-100 border p-3 rounded-xl text-lg hover:bg-gray-200 transition"
+              className="w-full min-h-[56px] bg-gray-100 border p-4 rounded-xl text-lg hover:bg-gray-200 transition"
             >
               🔐 Recuperar con huella o rostro
             </button>
@@ -252,7 +250,7 @@ export default function LoginPage() {
 
           <a
             href="/forgot-password"
-            className="block text-center text-blue-600 underline hover:text-blue-700"
+            className="block text-center text-blue-600 font-medium hover:text-blue-800 transition"
           >
             📧 Enviar enlace por correo
           </a>
