@@ -141,17 +141,28 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* BOTÓN */}
-        <button
-          type="submit"
-          className={`w-full p-4 rounded-xl text-2xl font-semibold transition ${
-            hasErrors
-              ? 'bg-red-600 text-white'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          }`}
-        >
-          Entrar
-        </button>
+       {/* BOTÓN */}
+       <button
+         type="submit"
+         className={`w-full p-4 rounded-xl text-2xl font-semibold transition ${
+          hasErrors
+            ? 'bg-red-600 text-white'
+            : 'bg-blue-600 text-white hover:bg-blue-700'
+         }`}
+       >
+        Entrar
+       </button>
+
+       {/* FORGOT PASSWORD */}
+       <p className="text-sm text-gray-600 text-center mt-4">
+         ¿Olvidó su contraseña?{' '}
+         <a
+           href="/forgot-password"
+           className="text-blue-600 underline hover:text-blue-700"
+         >
+          Recuperar acceso
+         </a>
+      </p>
       </form>
     </div>
   )
