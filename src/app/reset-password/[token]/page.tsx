@@ -1,44 +1,76 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from '@/lib/prisma'
-import crypto from 'crypto'
-import bcrypt from 'bcrypt'
+'use client'
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== 'POST') {
-    return res.status(405).end()
-  }
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
-  const { email } = req.body
+export default function ResetPasswordPage({
+  params,
+}: {
+  params: { token: string }
+}) {
+  const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState(false)
+  const router = useRouter()
 
-  if (!email) {
-    return res.status(200).json({ message: 'OK' })
-  }
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setLoading(true)
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-  })
+    const formData = new FormData(e.currentTarget)
 
-  if (user) {
-    const rawToken = crypto.randomBytes(32).toString('hex')
-    const tokenHash = await bcrypt.hash(rawToken, 10)
-
-    await prisma.passwordResetToken.create({
-      data: {
-        userId: user.id,
-        tokenHash,
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-      },
+    const res = await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: params.token,
+        password: formData.get('password'),
+      }),
     })
 
-    // ⚠ Aquí luego conectamos tu sistema de email
-    console.log(
-      `RESET LINK: ${process.env.NEXT_PUBLIC_APP_URL}/reset-password/${rawToken}`
+    if (res.ok) {
+      setDone(true)
+      setTimeout(() => router.push('/login'), 3000)
+    }
+
+    setLoading(false)
+  }
+
+  if (done) {
+    return (
+      <div className="max-w-md mx-auto mt-16 bg-white p-8 rounded-2xl shadow-md text-center">
+        <h2 className="text-2xl font-bold text-green-700 mb-4">
+          ✅ Contraseña actualizada
+        </h2>
+        <p className="text-gray-600">
+          Puede iniciar sesión nuevamente.
+        </p>
+      </div>
     )
   }
 
-  // Siempre devolver 200
-  return res.status(200).json({ message: 'OK' })
+  return (
+    <div className="max-w-md mx-auto mt-16 bg-white p-8 rounded-2xl shadow-md">
+      <h2 className="text-3xl font-bold mb-6">
+        Restablecer contraseña
+      </h2>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <input
+          type="password"
+          name="password"
+          required
+          placeholder="Nueva contraseña"
+          className="w-full p-4 border rounded-lg text-lg"
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white p-4 rounded-xl text-xl font-semibold hover:bg-blue-700"
+        >
+          {loading ? 'Actualizando...' : 'Actualizar contraseña'}
+        </button>
+      </form>
+    </div>
+  )
 }
