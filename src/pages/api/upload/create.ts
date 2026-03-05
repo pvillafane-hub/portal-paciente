@@ -98,11 +98,11 @@ export default async function handler(
 
         const data = await pdfParse(fileBuffer)
 
-        console.log("PDF TEXT SAMPLE:", data.text.slice(0, 500))
+        console.log("PDF TEXT SAMPLE:", data.text.slice(0, 2000))
 
         detectedType = detectDocumentType(data.text)
 
-        console.log("DETECTED TYPE:", detectedType)
+        console.log("DETECTED TYPE DETECTED:", detectedType)
 
       }
 

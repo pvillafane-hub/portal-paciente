@@ -2,33 +2,54 @@ export function detectDocumentType(text: string): string {
 
   const t = text.toLowerCase()
 
+  // LABORATORIOS
   const labKeywords = [
     "hemoglobin",
     "glucose",
     "cholesterol",
     "platelet",
-    "cbc",
+    "triglyceride",
+    "hdl",
+    "ldl",
     "blood",
-    "lab results"
+    "lab results",
+    "laboratory",
+    "reference range",
+    "cbc",
+    "hematology",
+    "chemistry",
+    "result value",
+    "normal range"
   ]
 
+  // RADIOLOGIA
   const imagingKeywords = [
     "radiology",
     "x-ray",
+    "xray",
     "mri",
     "ct scan",
     "ultrasound",
     "impression",
-    "findings"
+    "findings",
+    "radiograph",
+    "scan result",
+    "imaging"
   ]
 
+  // RECETAS
   const prescriptionKeywords = [
     "rx",
     "prescription",
     "medication",
+    "dosage",
     "take once daily",
+    "take twice daily",
     "tablet",
-    "capsule"
+    "capsule",
+    "mg",
+    "pharmacy",
+    "refill"
   ]
 
   if (labKeywords.some(k => t.includes(k))) {
