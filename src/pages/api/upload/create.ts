@@ -1,12 +1,11 @@
-import * as pdfParse from "pdf-parse"
-import { detectDocumentType } from "@/lib/documentClassifier"
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import formidable from 'formidable'
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { s3 } from "@/lib/s3";
-import { randomUUID } from "crypto";
-import fs from "fs";
+import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { s3 } from "@/lib/s3"
+import { randomUUID } from "crypto"
+import fs from "fs"
+import { detectDocumentType } from "@/lib/documentClassifier"
 
 // ⚠️ Necesario para usar formidable en Next.js
 export const config = {
@@ -19,6 +18,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -48,10 +48,10 @@ export default async function handler(
       keepExtensions: true,
     })
 
-    const [ fields, files ] = await form.parse(req)
+    const [fields, files] = await form.parse(req)
 
     console.log("FIELDS:", fields)
-    
+
     const file = Array.isArray(files.file)
       ? files.file[0]
       : files.file
@@ -70,15 +70,16 @@ export default async function handler(
       ? docTypeRaw[0]
       : docTypeRaw || ''
 
-   const facility = Array.isArray(facilityRaw)
+    const facility = Array.isArray(facilityRaw)
       ? facilityRaw[0]
       : facilityRaw || ''
 
-   const studyDate = Array.isArray(studyDateRaw)
+    const studyDate = Array.isArray(studyDateRaw)
       ? studyDateRaw[0]
       : studyDateRaw || ''
 
-    if (!docType || !facility || !studyDate) {
+    // ⚠️ SOLO facility y studyDate son obligatorios ahora
+    if (!facility || !studyDate) {
       return res.status(400).json({ error: 'Missing required fields' })
     }
 
@@ -91,13 +92,17 @@ export default async function handler(
 
       if (file.mimetype === "application/pdf") {
 
-         const pdfModule = await import("pdf-parse")
+        const pdfModule = await import("pdf-parse")
 
-        const pdfParse = (pdfModule as any).default || (pdfModule as any)
+        const pdfParse = (pdfModule as any).default || pdfModule
 
         const data = await pdfParse(fileBuffer)
 
+        console.log("PDF TEXT SAMPLE:", data.text.slice(0, 500))
+
         detectedType = detectDocumentType(data.text)
+
+        console.log("DETECTED TYPE:", detectedType)
 
       }
 
@@ -105,7 +110,12 @@ export default async function handler(
 
       console.error("PDF parse error:", error)
 
-    }   
+    }
+
+    // 🧠 Determinar tipo final
+    const finalDocType = docType || detectedType || "Otro"
+
+    console.log("FINAL DOC TYPE:", finalDocType)
 
     // 📌 Generar key único en S3
     const key = `${userId}/${randomUUID()}-${filename}`
@@ -120,15 +130,13 @@ export default async function handler(
       })
     )
 
-  
-
     // 🗂 5️⃣ Guardar documento en DB
     const document = await prisma.document.create({
       data: {
         userId,
         filename,
         filePath: key,
-        docType: detectedType || docType,
+        docType: finalDocType,
         facility,
         studyDate,
       },
@@ -137,7 +145,10 @@ export default async function handler(
     return res.status(200).json(document)
 
   } catch (error) {
+
     console.error('UPLOAD CREATE ERROR:', error)
+
     return res.status(500).json({ error: 'Internal Server Error' })
+
   }
 }
