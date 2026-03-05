@@ -91,9 +91,11 @@ export default async function handler(
 
       if (file.mimetype === "application/pdf") {
 
-        const pdfParse = await import("pdf-parse")
+         const pdfModule = await import("pdf-parse")
 
-        const data = await pdfParse.default(fileBuffer)
+        const pdfParse = (pdfModule as any).default || (pdfModule as any)
+
+        const data = await pdfParse(fileBuffer)
 
         detectedType = detectDocumentType(data.text)
 
@@ -103,7 +105,7 @@ export default async function handler(
 
       console.error("PDF parse error:", error)
 
-    }
+    }   
 
     // 📌 Generar key único en S3
     const key = `${userId}/${randomUUID()}-${filename}`
