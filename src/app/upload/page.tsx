@@ -120,7 +120,8 @@ export default function UploadPage() {
 
         setTimeout(() => {
           router.push('/dashboard')
-        }, 2000)
+          router.refresh()
+        }, 1500)
 
       } else {
 
