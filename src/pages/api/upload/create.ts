@@ -1,3 +1,4 @@
+import pdfParse from "pdf-parse"
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import formidable from 'formidable'
@@ -92,12 +93,15 @@ export default async function handler(
 
       if (file.mimetype === "application/pdf") {
 
-        const pdfModule = await import("pdf-parse")
-
-        const pdfParse = (pdfModule as any).default || pdfModule
-
         const data = await pdfParse(fileBuffer)
 
+        console.log("PDF TEXT SAMPLE:", data.text.slice(0,2000))
+
+        detectedType = detectDocumentType(data.text)
+
+        console.log("DOCUMENT TYPE DETECTED:", detectedType)
+
+      }
         console.log("PDF TEXT SAMPLE:", data.text.slice(0, 2000))
 
         detectedType = detectDocumentType(data.text)
