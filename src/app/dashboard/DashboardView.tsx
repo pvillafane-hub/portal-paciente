@@ -22,7 +22,7 @@ interface DashboardViewProps {
 export default function DashboardView({ user }: DashboardViewProps) {
 
   const sortedDocuments = [...user.documents].sort(
-    (a, b) => new Date(b.studyDate).getTime() - new Date(a.studyDate).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
   const latestDocument = sortedDocuments[0];
