@@ -1,5 +1,5 @@
-import DashboardView from "./DashboardView"
 import Link from "next/link"
+import DashboardView from "./DashboardView"
 import { prisma } from "@/lib/prisma"
 import { getValidatedSession } from "@/lib/auth"
 
@@ -11,14 +11,23 @@ export default async function Dashboard() {
     return null
   }
 
-  const user = await prisma.user.findUnique({
+  const userData = await prisma.user.findUnique({
     where: { id: session.userId },
     include: {
       documents: true
     }
   })
 
-  if (!user) return null
+  if (!userData) return null
+
+  // Convertir studyDate a Date para TypeScript
+  const user = {
+    ...userData,
+    documents: userData.documents.map(doc => ({
+      ...doc,
+      studyDate: new Date(doc.studyDate)
+    }))
+  }
 
   return (
     <div className="space-y-10">
@@ -77,7 +86,10 @@ function DashboardCard({
       href={href}
       className="bg-white border rounded-3xl p-8 hover:shadow-lg transition text-center block"
     >
-      <div className="text-5xl mb-4">{icon}</div>
+
+      <div className="text-5xl mb-4">
+        {icon}
+      </div>
 
       <h3 className="text-xl font-semibold mb-2">
         {title}
@@ -86,6 +98,7 @@ function DashboardCard({
       <p className="text-gray-600 text-lg">
         {description}
       </p>
+
     </Link>
   )
 }
