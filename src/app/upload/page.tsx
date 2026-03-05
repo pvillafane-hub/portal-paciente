@@ -19,6 +19,10 @@ export default function UploadPage() {
 
   const [fileName, setFileName] = useState("Ningún archivo seleccionado")
 
+  const [docTypeValue, setDocTypeValue] = useState("")
+  const [facilityValue, setFacilityValue] = useState("")
+  const [dateValue, setDateValue] = useState("")
+
   const fileRef = useRef<HTMLInputElement>(null)
   const docTypeRef = useRef<HTMLSelectElement>(null)
   const facilityRef = useRef<HTMLInputElement>(null)
@@ -36,19 +40,19 @@ export default function UploadPage() {
 
     if (name === 'docType') {
       if (!value) {
-        message = "Seleccione el tipo de documento."
+        message = "Seleccione el tipo de estudio."
       }
     }
 
     if (name === 'facility') {
       if (!value || value.trim() === '') {
-        message = "Escriba el nombre del hospital o clínica."
+        message = "Escriba el hospital o clínica."
       }
     }
 
     if (name === 'studyDate') {
       if (!value) {
-        message = "Seleccione la fecha en que se realizó el estudio."
+        message = "Seleccione la fecha del estudio."
       }
     }
 
@@ -80,42 +84,20 @@ export default function UploadPage() {
     }
 
     if (!docType) {
-      newErrors.docType = "Seleccione el tipo de documento."
+      newErrors.docType = "Seleccione el tipo de estudio."
     }
 
     if (!facility || facility.trim() === "") {
-      newErrors.facility = "Escriba el nombre del hospital o clínica."
+      newErrors.facility = "Escriba el hospital o clínica."
     }
 
     if (!studyDate) {
-      newErrors.studyDate = "Seleccione la fecha en que se realizó el estudio."
+      newErrors.studyDate = "Seleccione la fecha del estudio."
     }
 
     if (Object.keys(newErrors).length > 0) {
-
       setErrors(newErrors)
       setLoading(false)
-
-      if (newErrors.file && fileRef.current) {
-        fileRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        fileRef.current.focus()
-      }
-
-      else if (newErrors.docType && docTypeRef.current) {
-        docTypeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        docTypeRef.current.focus()
-      }
-
-      else if (newErrors.facility && facilityRef.current) {
-        facilityRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        facilityRef.current.focus()
-      }
-
-      else if (newErrors.studyDate && dateRef.current) {
-        dateRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        dateRef.current.focus()
-      }
-
       return
     }
 
@@ -137,7 +119,7 @@ export default function UploadPage() {
         setSaved(true)
 
         setTimeout(() => {
-          router.push('/view')
+          router.push('/dashboard')
         }, 2000)
 
       } else {
@@ -151,13 +133,12 @@ export default function UploadPage() {
     } catch {
 
       setErrors({
-        file: "Ocurrió un problema inesperado. Intente nuevamente."
+        file: "Ocurrió un problema inesperado."
       })
 
     }
 
     setLoading(false)
-
   }
 
   const hasErrors = Object.values(errors).some(Boolean)
@@ -166,38 +147,32 @@ export default function UploadPage() {
 
     <div className="max-w-2xl mx-auto">
 
-      <div className="bg-white/95 backdrop-blur rounded-2xl p-8 shadow-md">
+      <div className="bg-white rounded-2xl p-8 shadow-md">
 
         <h2 className="text-3xl font-bold mb-4">
           Subir estudio médico
         </h2>
 
         <p className="text-gray-600 text-lg mb-6">
-          Puede subir laboratorios, radiografías, recetas médicas o estudios clínicos.
+          Puede subir laboratorios, radiografías o recetas médicas.
         </p>
 
-        {/* PASOS PARA PACIENTES */}
-
-        <div className="mb-8 bg-blue-50 border border-blue-200 p-4 rounded-xl text-blue-800 text-lg">
+        <div className="mb-8 bg-blue-50 border border-blue-200 p-4 rounded-xl text-blue-800">
 
           Paso 1: Seleccione su estudio médico  
           <br/>
           Paso 2: Indique el tipo de estudio  
           <br/>
-          Paso 3: Indique dónde se realizó  
+          Paso 3: Indique el hospital o clínica  
           <br/>
           Paso 4: Indique la fecha
 
         </div>
 
         {saved && (
-
-          <div className="mb-6 p-6 rounded-xl border border-green-300 bg-green-50 text-green-800 text-lg font-semibold animate-fadeIn">
-
-            ✅ Documento guardado correctamente.
-
+          <div className="mb-6 p-6 rounded-xl border border-green-300 bg-green-50 text-green-800 text-lg font-semibold">
+            ✔ Estudio guardado correctamente. Redirigiendo...
           </div>
-
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -240,21 +215,15 @@ export default function UploadPage() {
             </div>
 
             {fileName !== "Ningún archivo seleccionado" && (
-              <div className="mt-2 text-green-700 font-semibold">
-                ✔ Archivo listo para subir
+              <div className="text-green-700 mt-2 font-semibold">
+                ✔ Estudio seleccionado
               </div>
             )}
 
-            <p className="text-gray-500 text-lg mt-2">
-              Seleccione un documento médico (PDF, JPG o PNG)
-            </p>
-
             {errors.file && (
-
-              <p className="mt-2 text-red-700 font-semibold flex items-center gap-2 animate-fadeIn">
+              <p className="mt-2 text-red-700 font-semibold">
                 ⚠ {errors.file}
               </p>
-
             )}
 
           </label>
@@ -268,15 +237,16 @@ export default function UploadPage() {
             <select
               ref={docTypeRef}
               name="docType"
-              defaultValue="Laboratorios"
-              onChange={(e) => validateField('docType', e.target.value)}
-              className={`mt-2 w-full p-4 text-lg border rounded-lg transition ${
-                errors.docType
-                  ? "border-red-600 bg-red-50"
-                  : "border-gray-300 focus:ring-2 focus:ring-blue-500"
-              }`}
+              onChange={(e) => {
+
+                setDocTypeValue(e.target.value)
+                validateField('docType', e.target.value)
+
+              }}
+              className="mt-2 w-full p-4 text-lg border rounded-lg"
             >
 
+              <option value="">Seleccione</option>
               <option value="Laboratorios">Laboratorios</option>
               <option value="Rayos X">Rayos X</option>
               <option value="MRI">MRI</option>
@@ -286,15 +256,21 @@ export default function UploadPage() {
 
             </select>
 
+            {docTypeValue && !errors.docType && (
+              <div className="text-green-700 mt-2 font-semibold">
+                ✔ Tipo de estudio seleccionado
+              </div>
+            )}
+
             {errors.docType && (
-              <p className="mt-2 text-red-700 font-semibold flex items-center gap-2 animate-fadeIn">
+              <p className="mt-2 text-red-700 font-semibold">
                 ⚠ {errors.docType}
               </p>
             )}
 
           </label>
 
-          {/* FACILIDAD */}
+          {/* HOSPITAL */}
 
           <label className="block text-lg font-semibold">
 
@@ -305,16 +281,23 @@ export default function UploadPage() {
               type="text"
               name="facility"
               placeholder="Ej. Hospital Manatí Medical"
-              onChange={(e) => validateField('facility', e.target.value)}
-              className={`mt-2 w-full p-4 text-lg border rounded-lg transition ${
-                errors.facility
-                  ? "border-red-600 bg-red-50"
-                  : "border-gray-300 focus:ring-2 focus:ring-blue-500"
-              }`}
+              onChange={(e) => {
+
+                setFacilityValue(e.target.value)
+                validateField('facility', e.target.value)
+
+              }}
+              className="mt-2 w-full p-4 text-lg border rounded-lg"
             />
 
+            {facilityValue && !errors.facility && (
+              <div className="text-green-700 mt-2 font-semibold">
+                ✔ Hospital indicado
+              </div>
+            )}
+
             {errors.facility && (
-              <p className="mt-2 text-red-700 font-semibold flex items-center gap-2 animate-fadeIn">
+              <p className="mt-2 text-red-700 font-semibold">
                 ⚠ {errors.facility}
               </p>
             )}
@@ -331,16 +314,23 @@ export default function UploadPage() {
               ref={dateRef}
               type="date"
               name="studyDate"
-              onChange={(e) => validateField('studyDate', e.target.value)}
-              className={`mt-2 w-full p-4 text-lg border rounded-lg transition ${
-                errors.studyDate
-                  ? "border-red-600 bg-red-50"
-                  : "border-gray-300 focus:ring-2 focus:ring-blue-500"
-              }`}
+              onChange={(e) => {
+
+                setDateValue(e.target.value)
+                validateField('studyDate', e.target.value)
+
+              }}
+              className="mt-2 w-full p-4 text-lg border rounded-lg"
             />
 
+            {dateValue && !errors.studyDate && (
+              <div className="text-green-700 mt-2 font-semibold">
+                ✔ Fecha seleccionada
+              </div>
+            )}
+
             {errors.studyDate && (
-              <p className="mt-2 text-red-700 font-semibold flex items-center gap-2 animate-fadeIn">
+              <p className="mt-2 text-red-700 font-semibold">
                 ⚠ {errors.studyDate}
               </p>
             )}
@@ -354,23 +344,17 @@ export default function UploadPage() {
               hasErrors
                 ? "bg-red-600 text-white"
                 : "bg-blue-600 text-white hover:bg-blue-700"
-            } disabled:opacity-50`}
+            }`}
           >
 
             {loading ? 'Guardando...' : 'Guardar estudio médico'}
 
           </button>
 
-          <p className="text-sm text-gray-600 mt-4">
-            Todos los campos son obligatorios.
-          </p>
-
         </form>
 
       </div>
 
     </div>
-
   )
-
 }
