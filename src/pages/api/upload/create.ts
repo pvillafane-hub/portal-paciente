@@ -1,4 +1,4 @@
-import pdfParse from "pdf-parse"
+import * as pdfParse from "pdf-parse"
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import formidable from 'formidable'
@@ -8,7 +8,6 @@ import { randomUUID } from "crypto"
 import fs from "fs"
 import { detectDocumentType } from "@/lib/documentClassifier"
 
-// ⚠️ Necesario para usar formidable en Next.js
 export const config = {
   api: {
     bodyParser: false,
@@ -26,7 +25,6 @@ export default async function handler(
 
   try {
 
-    // 🔐 1️⃣ Validar sesión
     const sessionId = req.cookies.pp_session
 
     if (!sessionId) {
@@ -43,7 +41,6 @@ export default async function handler(
 
     const userId = session.userId
 
-    // 📦 2️⃣ Procesar FormData con formidable
     const form = formidable({
       multiples: false,
       keepExtensions: true,
@@ -79,12 +76,10 @@ export default async function handler(
       ? studyDateRaw[0]
       : studyDateRaw || ''
 
-    // ⚠️ SOLO facility y studyDate son obligatorios ahora
     if (!facility || !studyDate) {
       return res.status(400).json({ error: 'Missing required fields' })
     }
 
-    // 📥 3️⃣ Leer archivo temporal creado por formidable
     const fileBuffer = fs.readFileSync(file.filepath)
 
     let detectedType = "Otro"
@@ -93,20 +88,13 @@ export default async function handler(
 
       if (file.mimetype === "application/pdf") {
 
-        const data = await pdfParse(fileBuffer)
+        const data = await (pdfParse as any)(fileBuffer)
 
-        console.log("PDF TEXT SAMPLE:", data.text.slice(0,2000))
-
-        detectedType = detectDocumentType(data.text)
-
-        console.log("DOCUMENT TYPE DETECTED:", detectedType)
-
-      }
         console.log("PDF TEXT SAMPLE:", data.text.slice(0, 2000))
 
         detectedType = detectDocumentType(data.text)
 
-        console.log("DETECTED TYPE DETECTED:", detectedType)
+        console.log("DOCUMENT TYPE DETECTED:", detectedType)
 
       }
 
@@ -116,15 +104,12 @@ export default async function handler(
 
     }
 
-    // 🧠 Determinar tipo final
     const finalDocType = docType || detectedType || "Otro"
 
     console.log("FINAL DOC TYPE:", finalDocType)
 
-    // 📌 Generar key único en S3
     const key = `${userId}/${randomUUID()}-${filename}`
 
-    // ☁️ 4️⃣ Subir a S3
     await s3.send(
       new PutObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
@@ -134,7 +119,6 @@ export default async function handler(
       })
     )
 
-    // 🗂 5️⃣ Guardar documento en DB
     const document = await prisma.document.create({
       data: {
         userId,
