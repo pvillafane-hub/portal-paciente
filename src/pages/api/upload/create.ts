@@ -8,6 +8,7 @@ import { randomUUID } from "crypto"
 import fs from "fs"
 import { detectDocumentType } from "@/lib/documentClassifier"
 
+// necesario para formidable
 export const config = {
   api: {
     bodyParser: false,
@@ -19,16 +20,24 @@ export default async function handler(
   res: NextApiResponse
 ) {
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
+  console.log("REQUEST METHOD:", req.method)
+
+  // permitir preflight (CORS)
+  if (req.method === "OPTIONS") {
+    return res.status(200).end()
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" })
   }
 
   try {
 
+    // validar sesión
     const sessionId = req.cookies.pp_session
 
     if (!sessionId) {
-      return res.status(401).json({ error: 'Unauthorized - No session' })
+      return res.status(401).json({ error: "Unauthorized - No session" })
     }
 
     const session = await prisma.session.findUnique({
@@ -36,11 +45,12 @@ export default async function handler(
     })
 
     if (!session || session.expiresAt < new Date()) {
-      return res.status(401).json({ error: 'Invalid or expired session' })
+      return res.status(401).json({ error: "Invalid or expired session" })
     }
 
     const userId = session.userId
 
+    // procesar form
     const form = formidable({
       multiples: false,
       keepExtensions: true,
@@ -55,7 +65,7 @@ export default async function handler(
       : files.file
 
     if (!file) {
-      return res.status(400).json({ error: 'File is required' })
+      return res.status(400).json({ error: "File is required" })
     }
 
     const filename = file.originalFilename || file.newFilename
@@ -66,18 +76,18 @@ export default async function handler(
 
     const docType = Array.isArray(docTypeRaw)
       ? docTypeRaw[0]
-      : docTypeRaw || ''
+      : docTypeRaw || ""
 
     const facility = Array.isArray(facilityRaw)
       ? facilityRaw[0]
-      : facilityRaw || ''
+      : facilityRaw || ""
 
     const studyDate = Array.isArray(studyDateRaw)
       ? studyDateRaw[0]
-      : studyDateRaw || ''
+      : studyDateRaw || ""
 
     if (!facility || !studyDate) {
-      return res.status(400).json({ error: 'Missing required fields' })
+      return res.status(400).json({ error: "Missing required fields" })
     }
 
     const fileBuffer = fs.readFileSync(file.filepath)
@@ -110,6 +120,7 @@ export default async function handler(
 
     const key = `${userId}/${randomUUID()}-${filename}`
 
+    // subir a S3
     await s3.send(
       new PutObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
@@ -119,6 +130,7 @@ export default async function handler(
       })
     )
 
+    // guardar en DB
     const document = await prisma.document.create({
       data: {
         userId,
@@ -134,9 +146,9 @@ export default async function handler(
 
   } catch (error) {
 
-    console.error('UPLOAD CREATE ERROR:', error)
+    console.error("UPLOAD CREATE ERROR:", error)
 
-    return res.status(500).json({ error: 'Internal Server Error' })
+    return res.status(500).json({ error: "Internal Server Error" })
 
   }
 }
