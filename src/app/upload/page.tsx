@@ -257,12 +257,10 @@ export default function UploadPage() {
             >
 
               <option value="">Seleccione</option>
-              <option value="Laboratorios">Laboratorios</option>
-              <option value="Rayos X">Rayos X</option>
-              <option value="MRI">MRI</option>
-              <option value="CT">CT</option>
-              <option value="Ultrasonido">Ultrasonido</option>
-              <option value="Otro">Otro</option>
+              <option value="Laboratorio">Laboratorio</option>
+              <option value="Radiografia">Radiografía / Imagen</option>
+              <option value="Receta">Receta médica</option>
+              <option value="Otro">Otro documento</option>
 
             </select>
 

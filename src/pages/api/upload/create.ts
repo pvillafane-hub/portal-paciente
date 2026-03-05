@@ -1,3 +1,5 @@
+import * as pdfParse from "pdf-parse"
+import { detectDocumentType } from "@/lib/documentClassifier"
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import formidable from 'formidable'
@@ -83,6 +85,26 @@ export default async function handler(
     // 📥 3️⃣ Leer archivo temporal creado por formidable
     const fileBuffer = fs.readFileSync(file.filepath)
 
+    let detectedType = "Otro"
+
+    try {
+
+      if (file.mimetype === "application/pdf") {
+
+        const pdfParse = await import("pdf-parse")
+
+        const data = await pdfParse.default(fileBuffer)
+
+        detectedType = detectDocumentType(data.text)
+
+      }
+
+    } catch (error) {
+
+      console.error("PDF parse error:", error)
+
+    }
+
     // 📌 Generar key único en S3
     const key = `${userId}/${randomUUID()}-${filename}`
 
@@ -104,7 +126,7 @@ export default async function handler(
         userId,
         filename,
         filePath: key,
-        docType,
+        docType: detectedType || docType,
         facility,
         studyDate,
       },
