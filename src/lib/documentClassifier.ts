@@ -4,7 +4,7 @@ export function detectDocumentType(text: string): string {
 
   // LABORATORIOS
   const labKeywords = [
-    "Hemoglobin",
+    "hemoglobin",
     "glucose",
     "cholesterol",
     "platelet",
