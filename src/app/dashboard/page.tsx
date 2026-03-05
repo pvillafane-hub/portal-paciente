@@ -1,37 +1,64 @@
-import Link from "next/link";
+import DashboardView from "./DashboardView"
+import Link from "next/link"
+import { prisma } from "@/lib/prisma"
+import { getValidatedSession } from "@/lib/auth"
 
-export default function Dashboard() {
+export default async function Dashboard() {
+
+  const session = await getValidatedSession()
+
+  if (!session) {
+    return null
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    include: {
+      documents: true
+    }
+  })
+
+  if (!user) return null
+
   return (
-    <div className="max-w-5xl mx-auto mt-14">
+    <div className="space-y-10">
 
-      <h2 className="text-2xl font-semibold mb-2">
-        Acciones rápidas
-      </h2>
+      {/* PANEL DEL PACIENTE */}
+      <DashboardView user={user} />
 
-      <p className="text-gray-600 text-lg mb-8">
-        Usa estas opciones para gestionar tus estudios médicos.
-      </p>
+      {/* ACCIONES RÁPIDAS */}
+      <div className="max-w-5xl mx-auto mt-14">
 
-      <div className="grid gap-6 md:grid-cols-2">
+        <h2 className="text-2xl font-semibold mb-2">
+          Acciones rápidas
+        </h2>
 
-        <DashboardCard
-          href="/upload"
-          icon="📤"
-          title="Subir estudio médico"
-          description="Laboratorios, radiografías o estudios clínicos"
-        />
+        <p className="text-gray-600 text-lg mb-8">
+          Usa estas opciones para gestionar tus estudios médicos.
+        </p>
 
-        <DashboardCard
-          href="/share"
-          icon="👨‍⚕️"
-          title="Enviar estudio a mi médico"
-          description="Comparte tus estudios con tu doctor o familiar"
-        />
+        <div className="grid gap-6 md:grid-cols-2">
+
+          <DashboardCard
+            href="/upload"
+            icon="📤"
+            title="Subir estudio médico"
+            description="Laboratorios, radiografías o estudios clínicos"
+          />
+
+          <DashboardCard
+            href="/share"
+            icon="👨‍⚕️"
+            title="Enviar estudio a mi médico"
+            description="Comparte tus estudios con tu doctor o familiar"
+          />
+
+        </div>
 
       </div>
 
     </div>
-  );
+  )
 }
 
 function DashboardCard({
@@ -40,17 +67,16 @@ function DashboardCard({
   title,
   description,
 }: {
-  href: string;
-  icon: string;
-  title: string;
-  description: string;
+  href: string
+  icon: string
+  title: string
+  description: string
 }) {
   return (
     <Link
       href={href}
       className="bg-white border rounded-3xl p-8 hover:shadow-lg transition text-center block"
     >
-
       <div className="text-5xl mb-4">{icon}</div>
 
       <h3 className="text-xl font-semibold mb-2">
@@ -60,7 +86,6 @@ function DashboardCard({
       <p className="text-gray-600 text-lg">
         {description}
       </p>
-
     </Link>
-  );
+  )
 }
