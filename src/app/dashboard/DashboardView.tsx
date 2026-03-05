@@ -61,8 +61,12 @@ export default function DashboardView({ user }: DashboardViewProps) {
       <div className="max-w-5xl mx-auto mt-10">
 
         <h2 className="text-2xl font-semibold mb-6">
-          Tus Documentos
+          Tus estudios médicos
         </h2>
+
+        <p className="text-gray-600 mb-6 text-lg">
+           Aquí puedes ver y compartir tus estudios médicos.
+        </p>
 
         {user.documents.length === 0 ? (
           <div className="bg-white rounded-2xl p-8 shadow-soft text-center text-gray-500 text-lg">
@@ -76,7 +80,7 @@ export default function DashboardView({ user }: DashboardViewProps) {
                 className="bg-white rounded-2xl p-6 shadow-soft space-y-2"
               >
                 <h3 className="text-xl font-semibold text-blue-700">
-                  {doc.filename}
+                  {doc.docType}
                 </h3>
 
                 <p className="text-gray-600">
@@ -92,14 +96,23 @@ export default function DashboardView({ user }: DashboardViewProps) {
                   {new Date(doc.studyDate).toLocaleDateString()}
                 </p>
 
-                <div className="pt-3">
-                  <a
-                    href={`/view/${doc.id}`}
-                    className="text-blue-600 underline text-lg"
-                  >
-                    Ver documento
-                  </a>
-                </div>
+                <div className="pt-4 flex flex-wrap gap-3">
+
+                    <a
+                       href={`/view/${doc.id}`}
+                       className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
+                     >
+                        Ver estudio
+                     </a>
+
+                     <a
+                        href={`/share/${doc.id}`}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-lg"
+                      >
+                        Enviar a mi médico
+                     </a>
+
+                 </div>
               </div>
             ))}
           </div>
