@@ -1,4 +1,4 @@
-import pdfParse from "pdf-parse"
+
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import formidable from 'formidable'
