@@ -3,6 +3,8 @@ import DashboardView from "./DashboardView"
 import { prisma } from "@/lib/prisma"
 import { getValidatedSession } from "@/lib/auth"
 
+export const dynamic = "force-dynamic";
+
 export default async function Dashboard() {
 
   const session = await getValidatedSession()
