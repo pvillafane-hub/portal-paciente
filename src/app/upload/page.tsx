@@ -157,6 +157,8 @@ export default function UploadPage() {
           Puede subir laboratorios, radiografías o recetas médicas.
         </p>
 
+        {/* PASOS */}
+
         <div className="mb-8 bg-blue-50 border border-blue-200 p-4 rounded-xl text-blue-800">
 
           Paso 1: Seleccione su estudio médico  
@@ -169,9 +171,12 @@ export default function UploadPage() {
 
         </div>
 
+        {/* MENSAJE DE ÉXITO */}
+
         {saved && (
           <div className="mb-6 p-6 rounded-xl border border-green-300 bg-green-50 text-green-800 text-lg font-semibold">
-            ✔ Estudio guardado correctamente. Redirigiendo...
+            ✔ Estudio guardado correctamente.  
+            Será redirigido a sus estudios médicos.
           </div>
         )}
 
@@ -213,6 +218,10 @@ export default function UploadPage() {
               </span>
 
             </div>
+
+            <p className="text-gray-500 text-sm mt-2">
+              PDF, JPG o PNG
+            </p>
 
             {fileName !== "Ningún archivo seleccionado" && (
               <div className="text-green-700 mt-2 font-semibold">
@@ -336,6 +345,8 @@ export default function UploadPage() {
             )}
 
           </label>
+
+          {/* BOTÓN */}
 
           <button
             type="submit"
