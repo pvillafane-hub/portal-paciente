@@ -20,6 +20,25 @@ interface DashboardViewProps {
 }
 
 export default function DashboardView({ user }: DashboardViewProps) {
+
+  // Ordenar documentos por fecha más reciente
+  const sortedDocuments = [...user.documents].sort(
+    (a, b) => new Date(b.studyDate).getTime() - new Date(a.studyDate).getTime()
+  );
+
+  // Último estudio
+  const latestDocument = sortedDocuments[0];
+
+  function getIcon(type: string) {
+    const t = type.toLowerCase();
+
+    if (t.includes("laboratorio")) return "🧪";
+    if (t.includes("radi")) return "🩻";
+    if (t.includes("receta")) return "💊";
+
+    return "📄";
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10">
 
@@ -57,35 +76,78 @@ export default function DashboardView({ user }: DashboardViewProps) {
 
       </div>
 
-      {/* DOCUMENTOS */}
+
+      {/* ÚLTIMO ESTUDIO DESTACADO */}
+      {latestDocument && (
+        <div className="max-w-5xl mx-auto mt-10 bg-white rounded-3xl shadow-soft p-8 border-l-8 border-blue-600">
+
+          <h2 className="text-2xl font-bold mb-4">
+            Tu último estudio médico
+          </h2>
+
+          <h3 className="text-xl font-semibold text-blue-700">
+            {getIcon(latestDocument.docType)} {latestDocument.docType}
+          </h3>
+
+          <p className="text-gray-600">
+            <strong>Institución:</strong> {latestDocument.facility}
+          </p>
+
+          <p className="text-gray-600">
+            <strong>Fecha:</strong>{" "}
+            {new Date(latestDocument.studyDate).toLocaleDateString()}
+          </p>
+
+          <div className="pt-4 flex gap-3 flex-wrap">
+
+            <a
+              href={`/view/${latestDocument.id}`}
+              className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
+            >
+              Ver estudio
+            </a>
+
+            <a
+              href={`/share/${latestDocument.id}`}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-lg"
+            >
+              Enviar a mi médico
+            </a>
+
+          </div>
+
+        </div>
+      )}
+
+
+      {/* HISTORIAL DE DOCUMENTOS */}
       <div className="max-w-5xl mx-auto mt-10">
 
-        <h2 className="text-2xl font-semibold mb-6">
-          Tus estudios médicos
+        <h2 className="text-2xl font-semibold">
+          Historial de estudios médicos
         </h2>
 
         <p className="text-gray-600 mb-6 text-lg">
-           Aquí puedes ver y compartir tus estudios médicos.
+          Aquí puedes ver y compartir tus estudios médicos.
         </p>
 
-        {user.documents.length === 0 ? (
+        {sortedDocuments.length === 0 ? (
           <div className="bg-white rounded-2xl p-8 shadow-soft text-center text-gray-500 text-lg">
             No tienes documentos cargados todavía.
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
-            {user.documents.map((doc) => (
+
+            {sortedDocuments.map((doc) => (
+
               <div
                 key={doc.id}
                 className="bg-white rounded-2xl p-6 shadow-soft space-y-2"
               >
-                <h3 className="text-xl font-semibold text-blue-700">
-                  {doc.docType}
-                </h3>
 
-                <p className="text-gray-600">
-                  <strong>Tipo:</strong> {doc.docType}
-                </p>
+                <h3 className="text-xl font-semibold text-blue-700">
+                  {getIcon(doc.docType)} {doc.docType}
+                </h3>
 
                 <p className="text-gray-600">
                   <strong>Institución:</strong> {doc.facility}
@@ -98,23 +160,26 @@ export default function DashboardView({ user }: DashboardViewProps) {
 
                 <div className="pt-4 flex flex-wrap gap-3">
 
-                    <a
-                       href={`/view/${doc.id}`}
-                       className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
-                     >
-                        Ver estudio
-                     </a>
+                  <a
+                    href={`/view/${doc.id}`}
+                    className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
+                  >
+                    Ver estudio
+                  </a>
 
-                     <a
-                        href={`/share/${doc.id}`}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-lg"
-                      >
-                        Enviar a mi médico
-                     </a>
+                  <a
+                    href={`/share/${doc.id}`}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-lg"
+                  >
+                    Enviar a mi médico
+                  </a>
 
-                 </div>
+                </div>
+
               </div>
+
             ))}
+
           </div>
         )}
 
