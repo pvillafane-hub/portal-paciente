@@ -1,4 +1,4 @@
-import * as pdfParse from "pdf-parse"
+import pdfParse from "pdf-parse"
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import formidable from 'formidable'
@@ -92,27 +92,7 @@ export default async function handler(
 
     const fileBuffer = fs.readFileSync(file.filepath)
 
-    let detectedType = "Otro"
-
-    try {
-
-      if (file.mimetype === "application/pdf") {
-
-        const data = await (pdfParse as any)(fileBuffer)
-
-        console.log("PDF TEXT SAMPLE:", data.text.slice(0, 2000))
-
-        detectedType = detectDocumentType(data.text)
-
-        console.log("DOCUMENT TYPE DETECTED:", detectedType)
-
-      }
-
-    } catch (error) {
-
-      console.error("PDF parse error:", error)
-
-    }
+    let detectedType = docType || "Otro"
 
     const finalDocType = docType || detectedType || "Otro"
 
