@@ -17,9 +17,10 @@ interface DashboardViewProps {
     createdAt: Date;
     documents: Document[];
   };
+  passkeyEnabled: boolean;
 }
 
-export default function DashboardView({ user }: DashboardViewProps) {
+export default function DashboardView({ user, passkeyEnabled }: DashboardViewProps) {
 
   const sortedDocuments = [...user.documents].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -89,8 +90,29 @@ export default function DashboardView({ user }: DashboardViewProps) {
           </a>
         </div>
 
+        {/* 🔐 ENTRAR FÁCIL */}
         <div className="mt-10">
-          <EntrarFacilButton />
+
+          {passkeyEnabled ? (
+
+            <div className="bg-green-50 border border-green-300 rounded-xl p-5 text-center">
+
+              <p className="text-green-800 font-semibold text-lg">
+                ✔ Entrar Fácil activado
+              </p>
+
+              <p className="text-green-700 mt-2 text-sm">
+                Puedes acceder con huella digital o reconocimiento facial.
+              </p>
+
+            </div>
+
+          ) : (
+
+            <EntrarFacilButton />
+
+          )}
+
         </div>
 
       </div>
@@ -146,7 +168,6 @@ export default function DashboardView({ user }: DashboardViewProps) {
           Historial de estudios médicos
         </h2>
 
-        {/* NUEVA LEYENDA DE COLORES */}
         <p className="text-gray-600 mt-2 text-lg">
           Cada color representa el tipo de estudio médico.
         </p>
@@ -167,7 +188,6 @@ export default function DashboardView({ user }: DashboardViewProps) {
 
         </div>
 
-        {/* CONTADOR DE ESTUDIOS */}
         <p className="text-gray-500 mb-6">
           {sortedDocuments.length} estudios registrados
         </p>

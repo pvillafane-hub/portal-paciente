@@ -22,6 +22,13 @@ export default async function Dashboard() {
 
   if (!userData) return null
 
+  // 🔐 Verificar si tiene passkey
+  const passkey = await prisma.authMethod.findFirst({
+    where: { userId: session.userId }
+  })
+
+  const passkeyEnabled = Boolean(passkey)
+
   // Convertir studyDate a Date para TypeScript
   const user = {
     ...userData,
@@ -35,7 +42,7 @@ export default async function Dashboard() {
     <div className="space-y-10">
 
       {/* PANEL DEL PACIENTE */}
-      <DashboardView user={user} />
+      <DashboardView user={user} passkeyEnabled={passkeyEnabled} />
 
       {/* ACCIONES RÁPIDAS */}
       <div className="max-w-5xl mx-auto mt-14">
