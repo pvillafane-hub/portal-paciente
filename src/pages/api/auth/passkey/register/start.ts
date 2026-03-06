@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const rpName = "Portal del Paciente";
+const rpName = "Enlace Salud";
 const rpID =
   process.env.NODE_ENV === "production"
     ? "portal-paciente-orpin.vercel.app"

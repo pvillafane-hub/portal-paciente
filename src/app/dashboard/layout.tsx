@@ -24,7 +24,7 @@ export default function DashboardLayout({
           {/* LOGO */}
 
           <Link href="/dashboard" className="text-xl font-bold">
-            Portal del Paciente
+            Enlace Salud
           </Link>
 
           {/* DESKTOP MENU */}

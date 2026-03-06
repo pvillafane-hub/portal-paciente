@@ -8,4 +8,4 @@ export const origin =
     ? "https://portal-paciente-orpin.vercel.app"
     : "http://localhost:3000";
 
-export const rpName = "Portal del Paciente";
+export const rpName = "Enlace Salud";
