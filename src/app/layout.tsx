@@ -16,7 +16,9 @@ export default function RootLayout({
   // páginas públicas
   const publicPages = ["/", "/login", "/signup", "/recovery"]
 
-  const showHeader = !publicPages.includes(pathname)
+  const showHeader = 
+     !publicPages.includes(pathname) &&
+     !pathname.startsWith("/dashboard")
 
   return (
     <html lang="es">
