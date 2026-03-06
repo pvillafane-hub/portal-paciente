@@ -19,11 +19,10 @@ export default async function ShareDocumentPage({
     )
   }
 
-  // Convertir fechas para evitar errores en React Client Components
   const document = {
     ...doc,
-    studyDate: new Date(doc.studyDate),
-    createdAt: new Date(doc.createdAt),
+    studyDate: new Date(doc.studyDate).toISOString(),
+    createdAt: new Date(doc.createdAt).toISOString(),
   }
 
   return (
