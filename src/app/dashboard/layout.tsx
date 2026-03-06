@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { logout } from "@/app/logout/actions"
 
 export default function DashboardLayout({
   children,
@@ -19,33 +20,42 @@ export default function DashboardLayout({
 
       <nav className="bg-white border-b">
 
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
 
           {/* LOGO */}
 
-          <Link href="/dashboard" className="text-xl font-bold">
+          <Link
+            href="/dashboard"
+            className="text-2xl font-bold text-blue-700"
+          >
             Enlace Salud
           </Link>
 
           {/* DESKTOP MENU */}
 
-          <div className="hidden md:flex items-center gap-6 text-lg">
+          <div className="hidden md:flex items-center gap-8 text-lg">
 
-            <Link href="/dashboard">
-              Dashboard
+            <Link href="/dashboard" className="hover:text-blue-600">
+              Inicio
             </Link>
 
-            <Link href="/upload">
-              Subir estudio
+            <Link href="/view" className="hover:text-blue-600">
+              Mis documentos
             </Link>
 
-            <Link href="/security">
+            <Link href="/dashboard/security" className="hover:text-blue-600">
               Seguridad
             </Link>
 
+            <form action={logout}>
+              <button className="text-red-600 hover:underline">
+                Salir
+              </button>
+            </form>
+
           </div>
 
-          {/* HAMBURGER (solo móvil) */}
+          {/* HAMBURGER */}
 
           <button
             className="md:hidden text-2xl"
@@ -59,25 +69,33 @@ export default function DashboardLayout({
         {/* MOBILE MENU */}
 
         {menuOpen && (
+
           <div className="md:hidden border-t">
 
             <div className="flex flex-col gap-4 p-6 text-lg">
 
               <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
-                Dashboard
+                Inicio
               </Link>
 
-              <Link href="/upload" onClick={() => setMenuOpen(false)}>
-                Subir estudio
+              <Link href="/view" onClick={() => setMenuOpen(false)}>
+                Mis documentos
               </Link>
 
-              <Link href="/security" onClick={() => setMenuOpen(false)}>
+              <Link href="/dashboard/security" onClick={() => setMenuOpen(false)}>
                 Seguridad
               </Link>
+
+              <form action={logout}>
+                <button className="text-red-600 text-left">
+                  Salir
+                </button>
+              </form>
 
             </div>
 
           </div>
+
         )}
 
       </nav>
