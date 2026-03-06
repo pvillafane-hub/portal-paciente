@@ -27,7 +27,7 @@ export default function DashboardLayout({
             Portal del Paciente
           </Link>
 
-          {/* MENU DESKTOP */}
+          {/* DESKTOP MENU */}
 
           <div className="hidden md:flex items-center gap-6 text-lg">
 
@@ -45,7 +45,7 @@ export default function DashboardLayout({
 
           </div>
 
-          {/* HAMBURGER MOBILE */}
+          {/* HAMBURGER (solo móvil) */}
 
           <button
             className="md:hidden text-2xl"
@@ -56,33 +56,31 @@ export default function DashboardLayout({
 
         </div>
 
-      </nav>
+        {/* MOBILE MENU */}
 
-      {/* MOBILE MENU */}
+        {menuOpen && (
+          <div className="md:hidden border-t">
 
-      {menuOpen && (
+            <div className="flex flex-col gap-4 p-6 text-lg">
 
-        <div className="md:hidden bg-white border-b">
+              <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
+                Dashboard
+              </Link>
 
-          <div className="flex flex-col gap-4 p-6 text-lg">
+              <Link href="/upload" onClick={() => setMenuOpen(false)}>
+                Subir estudio
+              </Link>
 
-            <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
-              Dashboard
-            </Link>
+              <Link href="/security" onClick={() => setMenuOpen(false)}>
+                Seguridad
+              </Link>
 
-            <Link href="/upload" onClick={() => setMenuOpen(false)}>
-              Subir estudio
-            </Link>
-
-            <Link href="/security" onClick={() => setMenuOpen(false)}>
-              Seguridad
-            </Link>
+            </div>
 
           </div>
+        )}
 
-        </div>
-
-      )}
+      </nav>
 
       {/* CONTENT */}
 
