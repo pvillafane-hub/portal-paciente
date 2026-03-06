@@ -195,7 +195,7 @@ export default function UploadPage() {
                   ref={fileRef}
                   type="file"
                   name="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
+                  accept="image/*.png"
                   className="hidden"
                   onChange={(e) => {
 
