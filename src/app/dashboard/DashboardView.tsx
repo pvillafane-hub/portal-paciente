@@ -142,14 +142,14 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
           <div className="pt-4 flex gap-3 flex-wrap">
 
             <a
-              href={`/view/${latestDocument.id}`}
+              href={`/dashboard/view/S${latestDocument.id}`}
               className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
             >
               Ver estudio
             </a>
 
             <a
-              href={`/share/${latestDocument.id}`}
+              href={`/dashboard/share/${latestDocument.id}`}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-lg"
             >
               Enviar a mi médico
