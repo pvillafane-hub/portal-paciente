@@ -231,7 +231,7 @@ export default function UploadPage() {
               className="mt-2 w-full p-4 text-lg border rounded-lg"
             >
 
-              <option value="">Detectar automáticamente</option>
+              <option value="">Seleccione tipo de documento</option>
               <option value="Laboratorio">Laboratorio</option>
               <option value="Radiografia">Radiografía / Imagen</option>
               <option value="Receta">Receta médica</option>
