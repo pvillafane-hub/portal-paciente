@@ -39,7 +39,7 @@ export default function DashboardLayout({
               Inicio
             </Link>
 
-            <Link href="/view" className="hover:text-blue-600">
+            <Link href="/dashboard/view" className="hover:text-blue-600">
               Mis documentos
             </Link>
 
@@ -48,7 +48,7 @@ export default function DashboardLayout({
             </Link>
 
             <form action={logout}>
-              <button className="text-red-600 hover:underline">
+              <button className="text-red-600 text-left">
                 Salir
               </button>
             </form>
@@ -78,7 +78,7 @@ export default function DashboardLayout({
                 Inicio
               </Link>
 
-              <Link href="/view" onClick={() => setMenuOpen(false)}>
+              <Link href="/dashboard/view" onClick={() => setMenuOpen(false)}>
                 Mis documentos
               </Link>
 
