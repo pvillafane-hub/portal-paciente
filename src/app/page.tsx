@@ -27,7 +27,7 @@ export default function LandingPage() {
         
         {/* TÍTULO */}
         <h1 className="text-4xl md:text-5xl font-bold mb-6 text-blue-700">
-          Portal del Paciente
+          🩺 Enlace Salud
         </h1>
 
         <p className="text-xl text-gray-700 mb-10">
