@@ -83,7 +83,7 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
           </div>
 
           <a
-            href="/upload"
+            href="/dashboard/upload"
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-2xl text-xl font-semibold transition text-center"
           >
             + Subir documento

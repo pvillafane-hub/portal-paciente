@@ -58,14 +58,14 @@ export default async function Dashboard() {
         <div className="grid gap-6 md:grid-cols-2">
 
           <DashboardCard
-            href="/upload"
+            href="/dashboard/upload"
             icon="📤"
             title="Subir estudio médico"
             description="Laboratorios, radiografías o estudios clínicos"
           />
 
           <DashboardCard
-            href="/share"
+            href="/dashboard/share"
             icon="👨‍⚕️"
             title="Enviar estudio a mi médico"
             description="Comparte tus estudios con tu doctor o familiar"

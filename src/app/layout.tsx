@@ -49,7 +49,7 @@ export default function RootLayout({
                 </Link>
 
                 <Link
-                  href="/view"
+                  href="/dashboard/view"
                   className="hover:text-blue-600 transition"
                 >
                   Mis documentos

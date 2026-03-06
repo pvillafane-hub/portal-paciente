@@ -152,7 +152,7 @@ export default function ViewPage() {
                 </button>
 
                 <Link
-                  href="/share"
+                  href="/dashboard/share"
                   className="bg-green-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
                 >
                   Compartir
