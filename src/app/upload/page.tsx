@@ -12,6 +12,7 @@ export default function UploadPage() {
 
   const [errors, setErrors] = useState<{
     file?: string
+    docType?: string
     facility?: string
     studyDate?: string
   }>({})
@@ -34,6 +35,12 @@ export default function UploadPage() {
     if (name === 'file') {
       if (!value || value.size === 0) {
         message = "Por favor, seleccione el documento que desea subir."
+      }
+    }
+
+    if (name === 'docType') {
+      if (!value || value === "") {
+        message = "Seleccione el tipo de documento."
       }
     }
 
@@ -66,6 +73,7 @@ export default function UploadPage() {
     const formData = new FormData(e.currentTarget)
 
     const file = formData.get('file') as File
+    const docType = formData.get('docType') as string
     const facility = formData.get('facility') as string
     const studyDate = formData.get('studyDate')
 
@@ -73,6 +81,10 @@ export default function UploadPage() {
 
     if (!file || file.size === 0) {
       newErrors.file = "Por favor, seleccione el documento que desea subir."
+    }
+
+    if (!docType || docType === "") {
+      newErrors.docType = "Seleccione el tipo de documento."
     }
 
     if (!facility || facility.trim() === "") {
@@ -150,7 +162,7 @@ export default function UploadPage() {
 
           Paso 1: Seleccione su estudio médico  
           <br/>
-          Paso 2: (Opcional) indique el tipo de estudio  
+          Paso 2: Seleccione el tipo de estudio  
           <br/>
           Paso 3: Indique el hospital o clínica  
           <br/>
@@ -204,12 +216,6 @@ export default function UploadPage() {
 
             </div>
 
-            {fileName !== "Ningún archivo seleccionado" && (
-              <div className="text-green-700 mt-2 font-semibold">
-                ✔ Estudio seleccionado
-              </div>
-            )}
-
             {errors.file && (
               <p className="mt-2 text-red-700 font-semibold">
                 ⚠ {errors.file}
@@ -222,12 +228,15 @@ export default function UploadPage() {
 
           <label className="block text-lg font-semibold">
 
-            🧾 Tipo de estudio (opcional)
+            🧾 Tipo de estudio
 
             <select
               ref={docTypeRef}
               name="docType"
-              onChange={(e) => setDocTypeValue(e.target.value)}
+              onChange={(e) => {
+                setDocTypeValue(e.target.value)
+                validateField('docType', e.target.value)
+              }}
               className="mt-2 w-full p-4 text-lg border rounded-lg"
             >
 
@@ -239,10 +248,10 @@ export default function UploadPage() {
 
             </select>
 
-            {docTypeValue && (
-              <div className="text-green-700 mt-2 font-semibold">
-                ✔ Tipo de estudio seleccionado
-              </div>
+            {errors.docType && (
+              <p className="mt-2 text-red-700 font-semibold">
+                ⚠ {errors.docType}
+              </p>
             )}
 
           </label>
@@ -266,12 +275,6 @@ export default function UploadPage() {
               }}
               className="mt-2 w-full p-4 text-lg border rounded-lg"
             />
-
-            {facilityValue && !errors.facility && (
-              <div className="text-green-700 mt-2 font-semibold">
-                ✔ Hospital indicado
-              </div>
-            )}
 
             {errors.facility && (
               <p className="mt-2 text-red-700 font-semibold">
@@ -300,12 +303,6 @@ export default function UploadPage() {
               className="mt-2 w-full p-4 text-lg border rounded-lg"
             />
 
-            {dateValue && !errors.studyDate && (
-              <div className="text-green-700 mt-2 font-semibold">
-                ✔ Fecha seleccionada
-              </div>
-            )}
-
             {errors.studyDate && (
               <p className="mt-2 text-red-700 font-semibold">
                 ⚠ {errors.studyDate}
@@ -317,11 +314,7 @@ export default function UploadPage() {
           <button
             type="submit"
             disabled={loading}
-            className={`p-4 rounded-xl text-2xl font-semibold w-full transition ${
-              hasErrors
-                ? "bg-red-600 text-white"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            }`}
+            className="p-4 rounded-xl text-2xl font-semibold w-full bg-blue-600 text-white hover:bg-blue-700 transition"
           >
 
             {loading ? 'Guardando...' : 'Guardar estudio médico'}
