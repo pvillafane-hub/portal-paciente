@@ -11,6 +11,8 @@ export default function UploadPage() {
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+
   const [errors, setErrors] = useState<{
     file?: string
     docType?: string
@@ -28,12 +30,6 @@ export default function UploadPage() {
   function validateField(name: string, value: any) {
 
     let message = ''
-
-    if (name === 'file') {
-      if (!value || value.size === 0) {
-        message = "Por favor, seleccione el documento que desea subir."
-      }
-    }
 
     if (name === 'docType') {
       if (!value || value === "") {
@@ -69,14 +65,17 @@ export default function UploadPage() {
 
     const formData = new FormData(e.currentTarget)
 
-    const file = formData.get('file') as File
+    if (selectedFile) {
+      formData.set('file', selectedFile)
+    }
+
     const docType = formData.get('docType') as string
     const facility = formData.get('facility') as string
     const studyDate = formData.get('studyDate')
 
     const newErrors: typeof errors = {}
 
-    if (!file || file.size === 0) {
+    if (!selectedFile) {
       newErrors.file = "Por favor, seleccione el documento que desea subir."
     }
 
@@ -174,6 +173,8 @@ export default function UploadPage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
 
+          {/* ARCHIVO */}
+
           <label className="block text-lg font-semibold">
 
             📄 Archivo
@@ -197,7 +198,7 @@ export default function UploadPage() {
 
                     if (!file) return
 
-                    let finalFile = file
+                    let finalFile: File | Blob = file
 
                     if (file.type.startsWith("image/")) {
 
@@ -217,25 +218,16 @@ export default function UploadPage() {
 
                     }
 
-                    let compressedFile: File
+                    let compressedFile = finalFile as File
 
-                  // convertir Blob → File si es necesario
-                 if (!(finalFile instanceof File)) {
-                   compressedFile = finalFile
-                 } else {
-                   compressedFile = new File([finalFile], finalFile.name, {
-                      type: finalFile.type,
-                    })
-                  }
+                    if (!(finalFile instanceof File)) {
+                      compressedFile = new File([finalFile], file.name, {
+                        type: file.type || "image/jpeg",
+                      })
+                    }
 
-                  const dataTransfer = new DataTransfer()
-                  dataTransfer.items.add(compressedFile)
-
-                  if (fileRef.current) {
-                    fileRef.current.files = dataTransfer.files
-                  }
-
-                    setFileName(finalFile.name)
+                    setSelectedFile(compressedFile)
+                    setFileName(compressedFile.name)
 
                     setErrors(prev => ({
                       ...prev,
@@ -261,6 +253,8 @@ export default function UploadPage() {
             )}
 
           </label>
+
+          {/* TIPO */}
 
           <label className="block text-lg font-semibold">
 
@@ -289,6 +283,8 @@ export default function UploadPage() {
 
           </label>
 
+          {/* HOSPITAL */}
+
           <label className="block text-lg font-semibold">
 
             🏥 Hospital o clínica
@@ -309,6 +305,8 @@ export default function UploadPage() {
             )}
 
           </label>
+
+          {/* FECHA */}
 
           <label className="block text-lg font-semibold">
 
