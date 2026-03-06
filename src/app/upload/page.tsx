@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useRef } from 'react'
+import imageCompression from "browser-image-compression"
 
 export default function UploadPage() {
 
@@ -18,10 +19,6 @@ export default function UploadPage() {
   }>({})
 
   const [fileName, setFileName] = useState("Ningún archivo seleccionado")
-
-  const [docTypeValue, setDocTypeValue] = useState("")
-  const [facilityValue, setFacilityValue] = useState("")
-  const [dateValue, setDateValue] = useState("")
 
   const fileRef = useRef<HTMLInputElement>(null)
   const docTypeRef = useRef<HTMLSelectElement>(null)
@@ -142,8 +139,6 @@ export default function UploadPage() {
     setLoading(false)
   }
 
-  const hasErrors = Object.values(errors).some(Boolean)
-
   return (
 
     <div className="max-w-2xl mx-auto">
@@ -179,8 +174,6 @@ export default function UploadPage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
 
-          {/* ARCHIVO */}
-
           <label className="block text-lg font-semibold">
 
             📄 Archivo
@@ -192,24 +185,55 @@ export default function UploadPage() {
                 Seleccionar documento
 
                 <input
-                   ref={fileRef}
-                   type="file"
-                   name="file"
-                   accept="image/*,.pdf"
-                   className="hidden"
-                   onChange={(e) => {
-                     const file = e.target.files?.[0]
+                  ref={fileRef}
+                  type="file"
+                  name="file"
+                  accept="image/*,.pdf"
+                  className="hidden"
 
-                     if (!file) return
+                  onChange={async (e) => {
 
-                     setFileName(file.name)
+                    const file = e.target.files?.[0]
 
-                    setErrors((prev) => ({
+                    if (!file) return
+
+                    let finalFile = file
+
+                    if (file.type.startsWith("image/")) {
+
+                      try {
+
+                        const options = {
+                          maxSizeMB: 1,
+                          maxWidthOrHeight: 1600,
+                          useWebWorker: true,
+                        }
+
+                        finalFile = await imageCompression(file, options)
+
+                      } catch (err) {
+                        console.error("Compression error:", err)
+                      }
+
+                    }
+
+                    const dataTransfer = new DataTransfer()
+                    dataTransfer.items.add(finalFile)
+
+                    if (fileRef.current) {
+                      fileRef.current.files = dataTransfer.files
+                    }
+
+                    setFileName(finalFile.name)
+
+                    setErrors(prev => ({
                       ...prev,
-                      file: undefined,
-                   }))
+                      file: undefined
+                    }))
+
                   }}
-                 />
+
+                />
 
               </label>
 
@@ -227,8 +251,6 @@ export default function UploadPage() {
 
           </label>
 
-          {/* TIPO */}
-
           <label className="block text-lg font-semibold">
 
             🧾 Tipo de estudio
@@ -236,10 +258,7 @@ export default function UploadPage() {
             <select
               ref={docTypeRef}
               name="docType"
-              onChange={(e) => {
-                setDocTypeValue(e.target.value)
-                validateField('docType', e.target.value)
-              }}
+              onChange={(e) => validateField('docType', e.target.value)}
               className="mt-2 w-full p-4 text-lg border rounded-lg"
             >
 
@@ -259,8 +278,6 @@ export default function UploadPage() {
 
           </label>
 
-          {/* HOSPITAL */}
-
           <label className="block text-lg font-semibold">
 
             🏥 Hospital o clínica
@@ -270,12 +287,7 @@ export default function UploadPage() {
               type="text"
               name="facility"
               placeholder="Ej. Hospital Manatí Medical"
-              onChange={(e) => {
-
-                setFacilityValue(e.target.value)
-                validateField('facility', e.target.value)
-
-              }}
+              onChange={(e) => validateField('facility', e.target.value)}
               className="mt-2 w-full p-4 text-lg border rounded-lg"
             />
 
@@ -287,8 +299,6 @@ export default function UploadPage() {
 
           </label>
 
-          {/* FECHA */}
-
           <label className="block text-lg font-semibold">
 
             📅 Fecha del estudio
@@ -297,12 +307,7 @@ export default function UploadPage() {
               ref={dateRef}
               type="date"
               name="studyDate"
-              onChange={(e) => {
-
-                setDateValue(e.target.value)
-                validateField('studyDate', e.target.value)
-
-              }}
+              onChange={(e) => validateField('studyDate', e.target.value)}
               className="mt-2 w-full p-4 text-lg border rounded-lg"
             />
 

@@ -17,6 +17,7 @@
     "@simplewebauthn/browser": "^13.2.2",
     "@simplewebauthn/server": "^13.2.2",
     "bcrypt": "^5.1.1",
+    "browser-image-compression": "^2.0.2",
     "formidable": "^3.5.4",
     "next": "14.0.4",
     "next-auth": "^4.24.5",
