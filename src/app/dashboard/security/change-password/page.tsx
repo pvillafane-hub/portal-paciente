@@ -6,12 +6,13 @@ import { revalidatePath } from 'next/cache'
 import ChangePasswordForm from './ChangePasswordForm'
 
 export default async function ChangePasswordPage() {
+
   const session = await getValidatedSession()
 
   if (!session) {
     redirect('/?auth=required')
-    return
   }
+
   const userId = session.userId
 
   async function changePassword(
@@ -24,6 +25,7 @@ export default async function ChangePasswordPage() {
     const newPassword = String(formData.get('newPassword') || '')
     const confirmPassword = String(formData.get('confirmPassword') || '')
 
+    // Validaciones básicas
     if (!currentPassword || !newPassword || !confirmPassword) {
       return { error: 'Debe completar todos los campos.' }
     }
