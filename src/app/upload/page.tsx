@@ -192,21 +192,24 @@ export default function UploadPage() {
                 Seleccionar documento
 
                 <input
-                  ref={fileRef}
-                  type="file"
-                  name="file"
-                  accept="image/*.png"
-                  className="hidden"
-                  onChange={(e) => {
+                   ref={fileRef}
+                   type="file"
+                   name="file"
+                   accept="image/*,.pdf"
+                   className="hidden"
+                   onChange={(e) => {
+                     const file = e.target.files?.[0]
 
-                    const file = e.target.files?.[0]
+                     if (!file) return
 
-                    validateField('file', file)
+                     setFileName(file.name)
 
-                    setFileName(file?.name || "Ningún archivo seleccionado")
-
+                    setErrors((prev) => ({
+                      ...prev,
+                      file: undefined,
+                   }))
                   }}
-                />
+                 />
 
               </label>
 
