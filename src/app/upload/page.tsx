@@ -217,12 +217,23 @@ export default function UploadPage() {
 
                     }
 
-                    const dataTransfer = new DataTransfer()
-                    dataTransfer.items.add(finalFile)
+                    let compressedFile: File
 
-                    if (fileRef.current) {
-                      fileRef.current.files = dataTransfer.files
-                    }
+                  // convertir Blob → File si es necesario
+                 if (!(finalFile instanceof File)) {
+                   compressedFile = finalFile
+                 } else {
+                   compressedFile = new File([finalFile], finalFile.name, {
+                      type: finalFile.type,
+                    })
+                  }
+
+                  const dataTransfer = new DataTransfer()
+                  dataTransfer.items.add(compressedFile)
+
+                  if (fileRef.current) {
+                    fileRef.current.files = dataTransfer.files
+                  }
 
                     setFileName(finalFile.name)
 
