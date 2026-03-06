@@ -11,7 +11,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
 
-  const pathname = usePathname()
+  const pathname = usePathname() ?? ""
 
   // páginas públicas
   const publicPages = ["/", "/login", "/signup", "/recovery"]
