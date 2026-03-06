@@ -20,9 +20,13 @@ export default async function ShareDocumentPage({
   }
 
   const document = {
-    ...doc,
-    studyDate: new Date(doc.studyDate).toISOString(),
-    createdAt: new Date(doc.createdAt).toISOString(),
+    id: doc.id,
+    filename: doc.filename,
+    filePath: doc.filePath,
+    docType: doc.docType,
+    facility: doc.facility,
+    studyDate: doc.studyDate.toString(),
+    createdAt: doc.createdAt.toString(),
   }
 
   return (
