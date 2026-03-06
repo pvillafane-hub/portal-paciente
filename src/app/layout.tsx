@@ -1,5 +1,8 @@
+'use client'
+
 import './globals.css'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { logout } from '@/app/logout/actions'
 
 export default function RootLayout({
@@ -7,64 +10,65 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+
+  const pathname = usePathname()
+
+  const showHeader = pathname !== "/"
+
   return (
     <html lang="es">
       <body className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-white">
 
-        {/* HEADER */}
-        <header className="bg-white/90 backdrop-blur border-b shadow-sm">
-          <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-
-            {/* LOGO */}
-            <Link
-              href="/dashboard"
-              className="text-2xl font-bold text-blue-700 hover:text-blue-800 transition"
-            >
-              Enlace Salud
-            </Link>
-
-            {/* NAV */}
-            <nav className="flex items-center gap-6 text-lg">
+        {/* HEADER SOLO SI NO ES LANDING */}
+        {showHeader && (
+          <header className="bg-white/90 backdrop-blur border-b shadow-sm">
+            <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
 
               <Link
                 href="/dashboard"
-                className="hover:text-blue-600 transition"
+                className="text-2xl font-bold text-blue-700 hover:text-blue-800 transition"
               >
-                Inicio
+                Enlace Salud
               </Link>
 
-              <Link
-                href="/view"
-                className="hover:text-blue-600 transition"
-              >
-                Mis documentos
-              </Link>
+              <nav className="flex items-center gap-6 text-lg">
 
-              <Link
-                href="/dashboard/security"
-                className="hover:text-blue-600 transition"
-              >
-                Seguridad
-              </Link>
-
-              <form action={logout}>
-                <button
-                  className="text-red-600 hover:underline"
+                <Link
+                  href="/dashboard"
+                  className="hover:text-blue-600 transition"
                 >
-                  Salir
-                </button>
-              </form>
+                  Inicio
+                </Link>
 
-            </nav>
+                <Link
+                  href="/view"
+                  className="hover:text-blue-600 transition"
+                >
+                  Mis documentos
+                </Link>
 
-          </div>
-        </header>
+                <Link
+                  href="/dashboard/security"
+                  className="hover:text-blue-600 transition"
+                >
+                  Seguridad
+                </Link>
 
+                <form action={logout}>
+                  <button className="text-red-600 hover:underline">
+                    Salir
+                  </button>
+                </form>
+
+              </nav>
+
+            </div>
+          </header>
+        )}
 
         {/* MAIN */}
         <main className="relative">
 
-          {/* BACKGROUND IMAGE */}
           <div className="absolute inset-0 -z-10">
             <div
               className="h-[320px] bg-cover bg-center"
