@@ -98,7 +98,7 @@ export default function ViewPage() {
       }
 
       // abrir en nueva pestaña
-      window.open(data.url, "_blank")
+      window.location.href = data.url
 
     } catch {
 
