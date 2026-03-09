@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 type Document = {
@@ -20,26 +19,45 @@ export default function ViewPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
-  //const searchParams = useSearchParams()
-
   useEffect(() => {
 
+    let ignore = false
+
     async function loadDocuments() {
+
       try {
 
-        const res = await fetch('/api/documents/list', { cache: "no-store" })
+        const res = await fetch('/api/documents/list')
 
-        if (res.ok) {
-          const data = await res.json()
+        if (!res.ok) {
+          throw new Error()
+        }
+
+        const data = await res.json()
+
+        if (!ignore) {
           setDocuments(data)
         }
 
+      } catch {
+
+        console.error('Error loading documents')
+
       } finally {
-        setLoading(false)
+
+        if (!ignore) {
+          setLoading(false)
+        }
+
       }
+
     }
 
     loadDocuments()
+
+    return () => {
+      ignore = true
+    }
 
   }, [])
 
@@ -66,7 +84,10 @@ export default function ViewPage() {
       setDocuments(prev => prev.filter(d => d.id !== documentId))
 
       setMessage('Documento eliminado correctamente.')
-      setTimeout(() => setMessage(null), 3000)
+
+      setTimeout(() => {
+        setMessage(null)
+      }, 3000)
 
     } catch {
 
@@ -77,6 +98,7 @@ export default function ViewPage() {
       setDeletingId(null)
 
     }
+
   }
 
   async function handleView(documentId: string) {
@@ -97,23 +119,22 @@ export default function ViewPage() {
         return
       }
 
-      // abrir en nueva pestaña
-      window.location.href = data.url
+      // más estable para móviles
+      window.location.assign(data.url)
 
     } catch {
 
       alert('Error abriendo documento')
 
     }
-  }
 
-  //const deleted = searchParams?.get('deleted')
+  }
 
   return (
 
     <div className="max-w-5xl mx-auto">
 
-      <div className="bg-white/90 backdrop-blur rounded-2xl p-8 shadow-sm">
+      <div className="bg-white rounded-2xl p-8 shadow-sm">
 
         <h2 className="text-3xl font-bold mb-8">
           Mis documentos médicos
@@ -158,7 +179,9 @@ export default function ViewPage() {
 
                 <p className="text-base text-gray-500">
                   Fecha del estudio:{' '}
-                  {doc.studyDate.split('-').reverse().join('/')}
+                  {doc.studyDate
+                    ? doc.studyDate.split('-').reverse().join('/')
+                    : '—'}
                 </p>
 
               </div>
@@ -204,5 +227,6 @@ export default function ViewPage() {
       </div>
 
     </div>
+
   )
 }
