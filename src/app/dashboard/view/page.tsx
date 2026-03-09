@@ -20,7 +20,7 @@ export default function ViewPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
-  const searchParams = useSearchParams()
+  //const searchParams = useSearchParams()
 
   useEffect(() => {
 
@@ -107,7 +107,7 @@ export default function ViewPage() {
     }
   }
 
-  const deleted = searchParams?.get('deleted')
+  //const deleted = searchParams?.get('deleted')
 
   return (
 
@@ -122,12 +122,6 @@ export default function ViewPage() {
         {message && (
           <div className="bg-green-50 border border-green-300 text-green-800 p-4 rounded-xl mb-6 text-lg font-semibold">
             ✅ {message}
-          </div>
-        )}
-
-        {deleted && (
-          <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-xl mb-6 text-lg">
-            Documento eliminado correctamente.
           </div>
         )}
 
