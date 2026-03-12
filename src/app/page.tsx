@@ -1,30 +1,52 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Link from "next/link";
 import EntrarFacilLoginButton from "@/components/EntrarFacilLoginButton";
 
 export default function LandingPage() {
+
   const searchParams = useSearchParams();
-  const authRequired = searchParams?.get("auth");
+  const router = useRouter();
+
+  const authMessage = searchParams?.get("auth");
+
+  // 🔐 si el usuario ya tiene sesión activa redirigir al dashboard
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        const res = await fetch("/api/auth/session-check");
+
+        if (res.ok) {
+          router.replace("/dashboard");
+        }
+
+      } catch {
+        // ignorar errores
+      }
+    }
+
+    checkSession();
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
       <div className="bg-white/95 backdrop-blur rounded-3xl p-12 shadow-soft max-w-xl w-full text-center">
 
-        {/* 🔐 MENSAJE DE AUTENTICACIÓN REQUERIDA */}
-        {authRequired === "required" && (
+        {/* MENSAJES DE SESIÓN */}
+        {authMessage === "required" && (
           <div className="mb-8 p-6 rounded-2xl border border-yellow-300 bg-yellow-50 text-yellow-800 text-lg font-semibold animate-fadeIn">
             🔐 Debe iniciar sesión para continuar.
           </div>
         )}
-        
-        {authRequired === "expired" && (
-         <div className="mb-8 p-6 rounded-2xl border border-red-300 bg-red-50 text-red-800 text-lg font-semibold animate-fadeIn">
-           ⏳ Su sesión ha expirado. Inicie sesión nuevamente.
-         </div>
+
+        {authMessage === "expired" && (
+          <div className="mb-8 p-6 rounded-2xl border border-red-300 bg-red-50 text-red-800 text-lg font-semibold animate-fadeIn">
+            ⏳ Su sesión ha expirado. Inicie sesión nuevamente.
+          </div>
         )}
-        
+
         {/* TÍTULO */}
         <h1 className="text-4xl md:text-5xl font-bold mb-6 text-blue-700">
           🩺 Enlace Salud
@@ -35,7 +57,7 @@ export default function LandingPage() {
           sencilla y confiable desde cualquier lugar.
         </p>
 
-        {/* ACCIONES PRINCIPALES */}
+        {/* ACCIONES */}
         <div className="flex flex-col gap-8">
 
           {/* ENTRAR FÁCIL */}
@@ -56,7 +78,7 @@ export default function LandingPage() {
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
-          {/* ENTRAR NORMAL */}
+          {/* LOGIN */}
           <Link
             href="/login"
             className="
@@ -75,7 +97,7 @@ export default function LandingPage() {
             Entrar
           </Link>
 
-          {/* CREAR CUENTA */}
+          {/* SIGNUP */}
           <Link
             href="/signup"
             className="

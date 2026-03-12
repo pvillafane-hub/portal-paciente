@@ -12,6 +12,26 @@ type Document = {
   studyDate: string
 }
 
+// 🔧 función para acortar nombres largos
+function formatFileName(name: string) {
+
+  const maxLength = 35
+
+  if (!name) return ""
+
+  if (name.length <= maxLength) {
+    return name
+  }
+
+  const parts = name.split(".")
+  const extension = parts.pop()
+  const base = parts.join(".")
+
+  const shortened = base.substring(0, maxLength)
+
+  return `${shortened}...${extension}`
+}
+
 export default function ViewPage() {
 
   const [documents, setDocuments] = useState<Document[]>([])
@@ -167,10 +187,11 @@ export default function ViewPage() {
               className="border rounded-2xl p-6 flex flex-col md:flex-row md:items-center md:justify-between"
             >
 
-              <div className="space-y-2">
+              <div className="space-y-2 max-w-full">
 
-                <p className="text-xl font-semibold">
-                  {doc.filename}
+                {/* 🔧 filename formateado */}
+                <p className="text-xl font-semibold truncate max-w-[300px]">
+                  {formatFileName(doc.filename)}
                 </p>
 
                 <p className="text-gray-700 text-lg">

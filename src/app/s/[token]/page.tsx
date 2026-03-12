@@ -4,16 +4,7 @@ import { redirect } from 'next/navigation'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { s3 } from '@/lib/s3'
-
-let prisma: any
-
-async function getPrisma() {
-  if (!prisma) {
-    const { PrismaClient } = await import('@prisma/client')
-    prisma = new PrismaClient()
-  }
-  return prisma
-}
+import { prisma } from '@/lib/prisma'
 
 function MessagePage({
   title,
@@ -25,6 +16,7 @@ function MessagePage({
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
       <div className="bg-white rounded-2xl shadow-md p-10 max-w-md w-full text-center">
+
         <h1 className="text-2xl font-bold text-gray-800 mb-4">
           {title}
         </h1>
@@ -41,6 +33,7 @@ function MessagePage({
             Enlace Salud
           </a>
         </div>
+
       </div>
     </div>
   )
@@ -51,14 +44,25 @@ export default async function SharedDocumentPage({
 }: {
   params: { token: string }
 }) {
-  const db = await getPrisma()
 
-  const share = await db.shareLink.findUnique({
-    where: { token: params.token },
+  const token = params.token
+
+  // 🔐 Validar formato del token (UUID)
+  if (!/^[0-9a-f-]{36}$/.test(token)) {
+    return (
+      <MessagePage
+        title="🔐 Enlace no válido"
+        message="El formato del enlace no es válido."
+      />
+    )
+  }
+
+  const share = await prisma.shareLink.findUnique({
+    where: { token },
     include: { document: true },
   })
 
-  // 🔐 1️⃣ Token no existe
+  // 🔐 Token no existe
   if (!share) {
     return (
       <MessagePage
@@ -68,7 +72,7 @@ export default async function SharedDocumentPage({
     )
   }
 
-  // ⏳ 2️⃣ Token expirado
+  // ⏳ Token expirado
   if (share.expiresAt < new Date()) {
     return (
       <MessagePage
@@ -78,8 +82,8 @@ export default async function SharedDocumentPage({
     )
   }
 
-  // 📁 3️⃣ Documento eliminado
-  if (!share.document) {
+  // 📁 Documento eliminado
+  if (!share.document || share.document.deletedAt) {
     return (
       <MessagePage
         title="📄 Documento no disponible"
@@ -88,7 +92,6 @@ export default async function SharedDocumentPage({
     )
   }
 
-  // ✅ 4️⃣ Generar signed URL y redirigir
   const key = share.document.filePath
 
   const command = new GetObjectCommand({
@@ -96,9 +99,11 @@ export default async function SharedDocumentPage({
     Key: key,
   })
 
+  // 🔑 Generar Signed URL
   const signedUrl = await getSignedUrl(s3, command, {
-    expiresIn: 60,
+    expiresIn: 300, // 5 minutos
   })
 
+  // 🚀 Redirigir al archivo en S3
   redirect(signedUrl)
 }

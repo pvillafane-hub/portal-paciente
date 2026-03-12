@@ -22,25 +22,46 @@ export default function ShareClient({
 }) {
 
   const [link, setLink] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   async function handleSubmit(formData: FormData) {
 
+    setLoading(true)
+    setError(null)
+
     const result = await createShareLink(null, formData) as ShareResult
 
+    setLoading(false)
+
     if ('error' in result) {
-      alert(result.error)
+      setError(result.error)
       return
     }
 
     setLink(`${window.location.origin}/s/${result.token}`)
   }
 
+  async function copyLink() {
+    if (!link) return
+
+    await navigator.clipboard.writeText(link)
+    setCopied(true)
+
+    setTimeout(() => {
+      setCopied(false)
+    }, 2000)
+  }
+
   return (
     <div>
+
       <form action={handleSubmit} className="space-y-8">
 
         <label className="block text-lg font-semibold">
           Documento a compartir
+
           <select
             name="documentId"
             required
@@ -54,11 +75,14 @@ export default function ShareClient({
                 {new Date(doc.studyDate).toLocaleDateString('es-PR')}
               </option>
             ))}
+
           </select>
         </label>
 
+
         <label className="block text-lg font-semibold">
           Expiración del enlace
+
           <select
             name="days"
             defaultValue="7"
@@ -68,16 +92,27 @@ export default function ShareClient({
             <option value="7">7 días</option>
             <option value="30">30 días</option>
           </select>
+
         </label>
+
 
         <button
           type="submit"
-          className="bg-green-600 text-white p-4 rounded-xl text-2xl font-semibold w-full hover:bg-green-700 transition"
+          disabled={loading}
+          className="bg-green-600 text-white p-4 rounded-xl text-2xl font-semibold w-full hover:bg-green-700 transition disabled:opacity-50"
         >
-          Generar enlace
+          {loading ? 'Generando enlace...' : 'Generar enlace'}
         </button>
 
       </form>
+
+
+      {error && (
+        <div className="mt-6 bg-red-50 border border-red-200 p-4 rounded-xl text-red-700">
+          {error}
+        </div>
+      )}
+
 
       {link && (
         <div className="mt-8 bg-green-50 border border-green-200 p-4 rounded-xl">
@@ -95,10 +130,10 @@ export default function ShareClient({
             />
 
             <button
-              onClick={() => navigator.clipboard.writeText(link)}
+              onClick={copyLink}
               className="bg-blue-600 text-white px-4 rounded-lg text-lg hover:bg-blue-700"
             >
-              Copiar
+              {copied ? 'Copiado ✓' : 'Copiar'}
             </button>
 
           </div>
@@ -109,6 +144,7 @@ export default function ShareClient({
 
         </div>
       )}
+
     </div>
   )
 }

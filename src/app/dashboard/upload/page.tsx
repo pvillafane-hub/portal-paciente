@@ -4,13 +4,34 @@ import { useRouter } from 'next/navigation'
 import { useState, useRef } from 'react'
 import imageCompression from "browser-image-compression"
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+
+// 🔧 función para acortar nombres largos
+function formatFileName(name: string) {
+
+  const maxLength = 28
+
+  if (!name) return ""
+
+  if (name.length <= maxLength) {
+    return name
+  }
+
+  const parts = name.split(".")
+  const extension = parts.pop()
+  const base = parts.join(".")
+
+  const shortened = base.substring(0, maxLength)
+
+  return `${shortened}...${extension}`
+}
+
 export default function UploadPage() {
 
   const router = useRouter()
 
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
-
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   const [errors, setErrors] = useState<{
@@ -32,7 +53,7 @@ export default function UploadPage() {
     let message = ''
 
     if (name === 'docType') {
-      if (!value || value === "") {
+      if (!value) {
         message = "Seleccione el tipo de documento."
       }
     }
@@ -76,10 +97,14 @@ export default function UploadPage() {
     const newErrors: typeof errors = {}
 
     if (!selectedFile) {
-      newErrors.file = "Por favor, seleccione el documento que desea subir."
+      newErrors.file = "Por favor, seleccione el documento."
     }
 
-    if (!docType || docType === "") {
+    if (selectedFile && selectedFile.size > MAX_FILE_SIZE) {
+      newErrors.file = "El archivo excede el tamaño máximo de 10MB."
+    }
+
+    if (!docType) {
       newErrors.docType = "Seleccione el tipo de documento."
     }
 
@@ -113,6 +138,9 @@ export default function UploadPage() {
       if (res.ok) {
 
         setSaved(true)
+
+        setSelectedFile(null)
+        setFileName("Ningún archivo seleccionado")
 
         setTimeout(() => {
           router.push('/dashboard')
@@ -152,22 +180,9 @@ export default function UploadPage() {
           Puede subir laboratorios, radiografías o recetas médicas.
         </p>
 
-        <div className="mb-8 bg-blue-50 border border-blue-200 p-4 rounded-xl text-blue-800">
-
-          Paso 1: Seleccione su estudio médico  
-          <br/>
-          Paso 2: Seleccione el tipo de estudio  
-          <br/>
-          Paso 3: Indique el hospital o clínica  
-          <br/>
-          Paso 4: Indique la fecha
-
-        </div>
-
         {saved && (
           <div className="mb-6 p-6 rounded-xl border border-green-300 bg-green-50 text-green-800 text-lg font-semibold">
-            ✔ Estudio guardado correctamente.  
-            Será redirigido a sus estudios médicos.
+            ✔ Estudio guardado correctamente.
           </div>
         )}
 
@@ -240,8 +255,9 @@ export default function UploadPage() {
 
               </label>
 
-              <span className="text-gray-600 text-lg">
-                {fileName}
+              {/* 🔧 nombre del archivo formateado */}
+              <span className="text-gray-600 text-lg truncate max-w-[220px]">
+                {formatFileName(fileName)}
               </span>
 
             </div>
@@ -249,80 +265,6 @@ export default function UploadPage() {
             {errors.file && (
               <p className="mt-2 text-red-700 font-semibold">
                 ⚠ {errors.file}
-              </p>
-            )}
-
-          </label>
-
-          {/* TIPO */}
-
-          <label className="block text-lg font-semibold">
-
-            🧾 Tipo de estudio
-
-            <select
-              ref={docTypeRef}
-              name="docType"
-              onChange={(e) => validateField('docType', e.target.value)}
-              className="mt-2 w-full p-4 text-lg border rounded-lg"
-            >
-
-              <option value="">Seleccione tipo de documento</option>
-              <option value="Laboratorio">Laboratorio</option>
-              <option value="Radiografia">Radiografía / Imagen</option>
-              <option value="Receta">Receta médica</option>
-              <option value="Otro">Otro documento</option>
-
-            </select>
-
-            {errors.docType && (
-              <p className="mt-2 text-red-700 font-semibold">
-                ⚠ {errors.docType}
-              </p>
-            )}
-
-          </label>
-
-          {/* HOSPITAL */}
-
-          <label className="block text-lg font-semibold">
-
-            🏥 Hospital o clínica
-
-            <input
-              ref={facilityRef}
-              type="text"
-              name="facility"
-              placeholder="Ej. Hospital Manatí Medical"
-              onChange={(e) => validateField('facility', e.target.value)}
-              className="mt-2 w-full p-4 text-lg border rounded-lg"
-            />
-
-            {errors.facility && (
-              <p className="mt-2 text-red-700 font-semibold">
-                ⚠ {errors.facility}
-              </p>
-            )}
-
-          </label>
-
-          {/* FECHA */}
-
-          <label className="block text-lg font-semibold">
-
-            📅 Fecha del estudio
-
-            <input
-              ref={dateRef}
-              type="date"
-              name="studyDate"
-              onChange={(e) => validateField('studyDate', e.target.value)}
-              className="mt-2 w-full p-4 text-lg border rounded-lg"
-            />
-
-            {errors.studyDate && (
-              <p className="mt-2 text-red-700 font-semibold">
-                ⚠ {errors.studyDate}
               </p>
             )}
 
