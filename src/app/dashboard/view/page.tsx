@@ -141,7 +141,6 @@ export default function ViewPage() {
         return
       }
 
-      // más estable para móviles
       window.location.assign(data.url)
 
     } catch {
@@ -149,6 +148,13 @@ export default function ViewPage() {
       alert('Error abriendo documento')
 
     }
+
+  }
+
+  // 🔧 FUNCIÓN PARA IR A SHARE
+  function handleShare(documentId: string) {
+
+    router.replace(`/dashboard/share?documentId=${documentId}`)
 
   }
 
@@ -217,9 +223,8 @@ export default function ViewPage() {
                   Ver documento
                 </button>
 
-                {/* 🔧 FIX navegación share */}
                 <button
-                  onClick={() => router.push(`/dashboard/share?documentId=${doc.id}`)}
+                  onClick={() => handleShare(doc.id)}
                   className="bg-green-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
                 >
                   Compartir
