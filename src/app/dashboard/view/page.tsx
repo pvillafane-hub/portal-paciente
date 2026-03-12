@@ -189,7 +189,6 @@ export default function ViewPage() {
 
               <div className="space-y-2 max-w-full">
 
-                {/* 🔧 filename formateado */}
                 <p className="text-xl font-semibold truncate max-w-[300px]">
                   {formatFileName(doc.filename)}
                 </p>
@@ -216,8 +215,9 @@ export default function ViewPage() {
                   Ver documento
                 </button>
 
+                {/* 🔧 FIX DEL BUG 404 */}
                 <Link
-                  href={`/share/${doc.id}`}
+                  href={`/dashboard/share?documentId=${doc.id}`}
                   className="bg-green-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
                 >
                   Compartir
