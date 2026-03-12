@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 type Document = {
   id: string
@@ -33,6 +33,8 @@ function formatFileName(name: string) {
 }
 
 export default function ViewPage() {
+
+  const router = useRouter()
 
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
@@ -215,13 +217,13 @@ export default function ViewPage() {
                   Ver documento
                 </button>
 
-                {/* 🔧 FIX DEL BUG 404 */}
-                <Link
-                  href={`/dashboard/share?documentId=${doc.id}`}
+                {/* 🔧 FIX navegación share */}
+                <button
+                  onClick={() => router.push(`/dashboard/share?documentId=${doc.id}`)}
                   className="bg-green-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
                 >
                   Compartir
-                </Link>
+                </button>
 
                 <button
                   onClick={() => handleDelete(doc.id)}
