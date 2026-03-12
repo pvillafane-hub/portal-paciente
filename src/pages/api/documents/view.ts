@@ -4,15 +4,22 @@ import { s3 } from "@/lib/s3"
 import { GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
+type ResponseData =
+  | { url: string }
+  | { error: string }
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<ResponseData>
 ) {
+
+  // 🔐 Solo permitir GET
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" })
   }
 
   try {
+
     // 🔐 1️⃣ Validar sesión
     const sessionId = req.cookies.pp_session
 
@@ -35,33 +42,43 @@ export default async function handler(
       id = id[0]
     }
 
-    if (!id) {
-      return res.status(400).json({ error: "Document ID required" })
+    if (!id || typeof id !== "string") {
+      return res.status(400).json({ error: "Invalid document ID" })
     }
 
-    // 📄 3️⃣ Buscar documento
-    const document = await prisma.document.findUnique({
-      where: { id },
+    // 📄 3️⃣ Buscar documento del usuario
+    const document = await prisma.document.findFirst({
+      where: {
+        id,
+        userId: session.userId,
+        deletedAt: null,
+      },
     })
 
-    if (!document || document.userId !== session.userId) {
+    if (!document) {
       return res.status(404).json({ error: "Document not found" })
     }
 
     // ☁️ 4️⃣ Generar Signed URL
     const command = new GetObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME!,
-      Key: document.filePath, // 🔥 SOLO EL KEY
+      Key: document.filePath,
     })
 
     const signedUrl = await getSignedUrl(s3, command, {
-      expiresIn: 60,
+      expiresIn: 60, // 60 segundos
     })
 
-    return res.status(200).json({ url: signedUrl })
+    return res.status(200).json({
+      url: signedUrl,
+    })
 
   } catch (error) {
+
     console.error("VIEW DOCUMENT ERROR:", error)
-    return res.status(500).json({ error: "Internal Server Error" })
+
+    return res.status(500).json({
+      error: "Internal server error",
+    })
   }
 }

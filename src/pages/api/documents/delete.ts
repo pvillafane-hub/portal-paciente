@@ -1,27 +1,36 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from '@/lib/prisma'
-import { s3 } from '@/lib/s3'
-import { DeleteObjectCommand } from '@aws-sdk/client-s3'
+import type { NextApiRequest, NextApiResponse } from "next"
+import { prisma } from "@/lib/prisma"
+import { s3 } from "@/lib/s3"
+import { DeleteObjectCommand } from "@aws-sdk/client-s3"
+
+type ResponseData =
+  | { ok: true }
+  | { error: string }
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<ResponseData>
 ) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
+
+  // 🔐 Solo permitir POST
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" })
   }
 
   try {
+
     const { documentId } = req.body
 
-    if (!documentId) {
-      return res.status(400).json({ error: 'Document ID required' })
+    // 🔎 Validar documentId
+    if (!documentId || typeof documentId !== "string") {
+      return res.status(400).json({ error: "Invalid document ID" })
     }
 
+    // 🔐 Validar sesión
     const sessionId = req.cookies.pp_session
 
     if (!sessionId) {
-      return res.status(401).json({ error: 'Unauthorized' })
+      return res.status(401).json({ error: "Unauthorized - No session" })
     }
 
     const session = await prisma.session.findUnique({
@@ -29,31 +38,37 @@ export default async function handler(
     })
 
     if (!session || session.expiresAt < new Date()) {
-      return res.status(401).json({ error: 'Invalid session' })
+      return res.status(401).json({ error: "Invalid or expired session" })
     }
 
-    const document = await prisma.document.findUnique({
-      where: { id: documentId },
+    const userId = session.userId
+
+    // 📄 Buscar documento del usuario
+    const document = await prisma.document.findFirst({
+      where: {
+        id: documentId,
+        userId,
+      },
     })
 
-    if (!document || document.userId !== session.userId) {
-      return res.status(404).json({ error: 'Document not found' })
+    if (!document) {
+      return res.status(404).json({ error: "Document not found" })
     }
 
-    // 🗑 Eliminar archivo en S3
+    // ☁️ Eliminar archivo en S3
     await s3.send(
       new DeleteObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME!,
         Key: document.filePath,
       })
     )
-       
-    // 🧹 Eliminar enlaces compartidos asociados
+
+    // 🧹 Eliminar enlaces compartidos
     await prisma.shareLink.deleteMany({
-       where: { documentId },
+      where: { documentId },
     })
 
-    // 🗑 Eliminar registro en DB
+    // 🗑 Eliminar documento
     await prisma.document.delete({
       where: { id: documentId },
     })
@@ -61,7 +76,11 @@ export default async function handler(
     return res.status(200).json({ ok: true })
 
   } catch (error) {
-    console.error('DELETE DOCUMENT ERROR:', error)
-    return res.status(500).json({ error: 'Internal Server Error' })
+
+    console.error("DELETE DOCUMENT ERROR:", error)
+
+    return res.status(500).json({
+      error: "Internal server error",
+    })
   }
 }

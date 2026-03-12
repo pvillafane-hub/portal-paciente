@@ -1,19 +1,30 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
 export function middleware(request: NextRequest) {
-  const session = request.cookies.get('pp_session')?.value
+
+  const session = request.cookies.get("pp_session")?.value
   const { pathname } = request.nextUrl
 
-  const protectedPaths = ['/upload', '/view', '/dashboard']
+  // 🔐 Rutas protegidas
+  const protectedRoutes = [
+    "/dashboard",
+    "/upload",
+    "/view",
+    "/share"
+  ]
 
-  const isProtected = protectedPaths.some(path =>
-    pathname.startsWith(path)
+  const isProtected = protectedRoutes.some(route =>
+    pathname.startsWith(route)
   )
 
-  if (isProtected && !session) {
-    const loginUrl = new URL('/', request.url)
-    loginUrl.searchParams.set('auth', 'required')
+  // 🚫 Bloquear acceso si no hay sesión
+  if (isProtected && (!session || session.length === 0)) {
+
+    const loginUrl = new URL("/", request.url)
+    loginUrl.searchParams.set("auth", "required")
+
     return NextResponse.redirect(loginUrl)
   }
 
@@ -21,5 +32,10 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/upload/:path*', '/view/:path*', '/dashboard/:path*'],
+  matcher: [
+    "/dashboard/:path*",
+    "/upload/:path*",
+    "/view/:path*",
+    "/share/:path*"
+  ],
 }
