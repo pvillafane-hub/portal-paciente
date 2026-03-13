@@ -162,12 +162,13 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
 
           <div className="pt-4 flex gap-3 flex-wrap">
 
-            <button
-              onClick={() => openDocument(latestDocument.id)}
+            {/* CAMBIO AQUI */}
+            <a
+              href="/dashboard/view"
               className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
             >
-              Ver mis estudiosS
-            </button>
+              Ver mis estudios
+            </a>
 
             <a
               href={`/dashboard/share/${latestDocument.id}`}
@@ -243,7 +244,7 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
                         onClick={() => openDocument(doc.id)}
                         className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
                       >
-                        Ver mis estudiosS
+                        Ver estudio
                       </button>
 
                       <a
