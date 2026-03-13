@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 type Document = {
   id: string
@@ -13,8 +12,6 @@ type Document = {
 }
 
 export default function ViewPage() {
-
-  const router = useRouter()
 
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
@@ -51,7 +48,7 @@ export default function ViewPage() {
 
     const data = await res.json()
 
-    window.location.assign(data.url)
+    window.open(data.url, "_blank")
 
   }
 
