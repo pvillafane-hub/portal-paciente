@@ -39,10 +39,6 @@ export default function DashboardLayout({
               Inicio
             </Link>
 
-            <Link href="/dashboard/view" className="hover:text-blue-600">
-              Mis documentos
-            </Link>
-
             <Link href="/dashboard/security" className="hover:text-blue-600">
               Seguridad
             </Link>
@@ -76,10 +72,6 @@ export default function DashboardLayout({
 
               <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
                 Inicio
-              </Link>
-
-              <Link href="/dashboard/view" onClick={() => setMenuOpen(false)}>
-                Mis documentos
               </Link>
 
               <Link href="/dashboard/security" onClick={() => setMenuOpen(false)}>
