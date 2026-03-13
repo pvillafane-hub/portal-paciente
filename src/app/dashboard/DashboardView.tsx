@@ -1,3 +1,5 @@
+'use client'
+
 import EntrarFacilButton from "@/components/EntrarFacilButton";
 
 interface Document {
@@ -106,7 +108,6 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
           </a>
         </div>
 
-        {/* ENTRAR FACIL */}
         <div className="mt-10">
 
           {passkeyEnabled ? (
@@ -175,107 +176,3 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
 
         </div>
       )}
-
-
-      {/* HISTORIAL */}
-      <div className="max-w-5xl mx-auto mt-10">
-
-        <h2 className="text-2xl font-semibold">
-          Historial de estudios médicos
-        </h2>
-
-        <p className="text-gray-600 mt-2 text-lg">
-          Cada color representa el tipo de estudio médico.
-        </p>
-
-        <div className="flex flex-wrap gap-4 mt-3 mb-4 text-lg">
-
-          <div className="bg-green-100 text-green-700 px-3 py-1 rounded-lg font-semibold">
-            🧪 Laboratorio
-          </div>
-
-          <div className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-semibold">
-            🩻 Radiografía
-          </div>
-
-          <div className="bg-orange-100 text-orange-700 px-3 py-1 rounded-lg font-semibold">
-            💊 Receta
-          </div>
-
-        </div>
-
-        <p className="text-gray-500 mb-6">
-          {sortedDocuments.length} estudios registrados
-        </p>
-
-
-        {sortedDocuments.length === 0 ? (
-          <div className="bg-white rounded-2xl p-8 shadow-soft text-center text-gray-500 text-lg">
-            No tienes documentos cargados todavía.
-          </div>
-        ) : (
-
-          Object.entries(documentsByYear).map(([year, docs]) => (
-
-            <div key={year} className="mb-10">
-
-              <h3 className="text-xl font-bold text-gray-700 mb-4">
-                {year}
-              </h3>
-
-              <div className="grid md:grid-cols-2 gap-6">
-
-                {docs.map((doc) => (
-
-                  <div
-                    key={doc.id}
-                    className="bg-white rounded-2xl p-6 shadow-soft space-y-2"
-                  >
-
-                    <div className={`inline-block px-3 py-1 rounded-lg text-lg font-semibold ${getColor(doc.docType)}`}>
-                      {getIcon(doc.docType)} {doc.docType}
-                    </div>
-
-                    <p className="text-gray-600">
-                      <strong>Institución:</strong> {doc.facility}
-                    </p>
-
-                    <p className="text-gray-600">
-                      <strong>Fecha:</strong>{" "}
-                      {new Date(doc.studyDate).toLocaleDateString()}
-                    </p>
-
-                    <div className="pt-4 flex flex-wrap gap-3">
-
-                      <button
-                        onClick={() => openDocument(doc.id)}
-                        className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
-                      >
-                        Ver estudio
-                      </button>
-
-                      <a
-                        href={`/share/${doc.id}`}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-lg"
-                      >
-                        Enviar a mi médico
-                      </a>
-
-                    </div>
-
-                  </div>
-
-                ))}
-
-              </div>
-
-            </div>
-
-          ))
-
-        )}
-
-      </div>
-    </div>
-  );
-}
