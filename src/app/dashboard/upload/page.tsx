@@ -145,7 +145,8 @@ export default function UploadPage() {
         setFileName("Ningún archivo seleccionado")
 
         setTimeout(() => {
-          router.push(`/dashboard/view/${document.id}`)
+          router.push('/dashboard')
+          router.refresh()  
         }, 1500)
 
       } else {
