@@ -54,7 +54,7 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
 
     const data = await res.json();
 
-    window.location.href = data.url;
+    window.open(data.url, "_blank")
   }
 
 
