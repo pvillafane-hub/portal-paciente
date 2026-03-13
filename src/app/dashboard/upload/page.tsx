@@ -137,14 +137,15 @@ export default function UploadPage() {
 
       if (res.ok) {
 
+        const document = await res.json()
+
         setSaved(true)
 
         setSelectedFile(null)
         setFileName("Ningún archivo seleccionado")
 
         setTimeout(() => {
-          router.push('/dashboard')
-          router.refresh()
+          router.push(`/dashboard/view/${document.id}`)
         }, 1500)
 
       } else {
