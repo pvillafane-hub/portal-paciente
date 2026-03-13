@@ -166,7 +166,7 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
               onClick={() => openDocument(latestDocument.id)}
               className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
             >
-              Ver estudio
+              Ver mis estudiosS
             </button>
 
             <a
@@ -243,7 +243,7 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
                         onClick={() => openDocument(doc.id)}
                         className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
                       >
-                        Ver estudio
+                        Ver mis estudiosS
                       </button>
 
                       <a
