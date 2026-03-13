@@ -40,6 +40,22 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
     return groups;
   }, {} as Record<number, Document[]>);
 
+
+  async function openDocument(documentId: string) {
+
+    const res = await fetch(`/api/documents/view?id=${documentId}`);
+
+    if (!res.ok) {
+      alert("Error cargando documento");
+      return;
+    }
+
+    const data = await res.json();
+
+    window.open(data.url, "_blank");
+  }
+
+
   function getIcon(type: string) {
     const t = type.toLowerCase();
 
@@ -90,7 +106,7 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
           </a>
         </div>
 
-        {/* 🔐 ENTRAR FÁCIL */}
+        {/* ENTRAR FACIL */}
         <div className="mt-10">
 
           {passkeyEnabled ? (
@@ -118,7 +134,7 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
       </div>
 
 
-      {/* ÚLTIMO ESTUDIO */}
+      {/* ULTIMO ESTUDIO */}
       {latestDocument && (
         <div className="max-w-5xl mx-auto mt-10 bg-white rounded-3xl shadow-soft p-8 border-l-8 border-blue-600">
 
@@ -141,12 +157,12 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
 
           <div className="pt-4 flex gap-3 flex-wrap">
 
-            <a
-              href="/dashboard/view"
+            <button
+              onClick={() => openDocument(latestDocument.id)}
               className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
             >
               Ver estudio
-            </a>
+            </button>
 
             <a
               href={`/dashboard/share/${latestDocument.id}`}
@@ -231,12 +247,12 @@ export default function DashboardView({ user, passkeyEnabled }: DashboardViewPro
 
                     <div className="pt-4 flex flex-wrap gap-3">
 
-                      <a
-                        href={`/view/${doc.id}`}
+                      <button
+                        onClick={() => openDocument(doc.id)}
                         className="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-lg"
                       >
                         Ver estudio
-                      </a>
+                      </button>
 
                       <a
                         href={`/share/${doc.id}`}
