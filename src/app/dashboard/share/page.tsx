@@ -3,26 +3,18 @@ export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import ShareClient from './share-client'
 import { cookies } from 'next/headers'
-
-let prisma: any
-
-async function getPrisma() {
-  if (!prisma) {
-    const { PrismaClient } = await import('@prisma/client')
-    prisma = new PrismaClient()
-  }
-  return prisma
-}
+import { prisma } from '@/lib/prisma'
 
 export default async function SharePage() {
+
   const cookieStore = cookies()
   const sessionId = cookieStore.get('pp_session')?.value
 
-  if (!sessionId) redirect('/login')
+  if (!sessionId) {
+    redirect('/login')
+  }
 
-  const db = await getPrisma()
-
-  const session = await db.session.findUnique({
+  const session = await prisma.session.findUnique({
     where: { id: sessionId },
   })
 
@@ -30,16 +22,20 @@ export default async function SharePage() {
     redirect('/login')
   }
 
-  const documents = await db.document.findMany({
+  const documents = await prisma.document.findMany({
     where: {
       userId: session.userId,
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: {
+      createdAt: 'desc'
+    },
   })
 
   return (
     <div className="max-w-4xl mx-auto">
+
       <div className="bg-white/90 backdrop-blur rounded-2xl p-8 shadow-sm">
+
         <h2 className="text-3xl font-bold mb-8">
           Compartir documento
         </h2>
@@ -51,7 +47,9 @@ export default async function SharePage() {
         ) : (
           <ShareClient documents={documents} />
         )}
+
       </div>
+
     </div>
   )
 }
