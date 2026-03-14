@@ -47,11 +47,7 @@ export default function RootLayout({
                 <Link href="/dashboard" className="hover:text-blue-600">
                   Inicio
                 </Link>
-
-                <Link href="/dashboard/view" className="hover:text-blue-600">
-                  Mis documentos
-                </Link>
-
+                
                 <Link href="/dashboard/security" className="hover:text-blue-600">
                   Seguridad
                 </Link>
