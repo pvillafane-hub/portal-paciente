@@ -14,23 +14,27 @@ export default function RootLayout({
   const pathname = usePathname() ?? ""
 
   // páginas públicas
-  const publicPages = ["/", "/login", "/signup", "/recovery"]
+  const publicPages = [
+    "/",
+    "/login",
+    "/signup",
+    "/recovery",
+    "/reset-password-direct"
+  ]
 
-  const showHeader = 
-     !publicPages.includes(pathname) &&
-     !pathname.startsWith("/dashboard")
+  const showHeader =
+    pathname.startsWith("/dashboard") &&
+    !publicPages.includes(pathname)
 
   return (
     <html lang="es">
       <body className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-white">
 
-        {/* HEADER SOLO EN PÁGINAS INTERNAS */}
         {showHeader && (
           <header className="bg-white/90 backdrop-blur border-b shadow-sm">
 
             <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
 
-              {/* LOGO */}
               <Link
                 href="/dashboard"
                 className="text-2xl font-bold text-blue-700 hover:text-blue-800 transition"
@@ -38,27 +42,17 @@ export default function RootLayout({
                 Enlace Salud
               </Link>
 
-              {/* MENÚ */}
               <nav className="flex items-center gap-6 text-lg">
 
-                <Link
-                  href="/dashboard"
-                  className="hover:text-blue-600 transition"
-                >
+                <Link href="/dashboard" className="hover:text-blue-600">
                   Inicio
                 </Link>
 
-                <Link
-                  href="/dashboard/view"
-                  className="hover:text-blue-600 transition"
-                >
+                <Link href="/dashboard/view" className="hover:text-blue-600">
                   Mis documentos
                 </Link>
 
-                <Link
-                  href="/dashboard/security"
-                  className="hover:text-blue-600 transition"
-                >
+                <Link href="/dashboard/security" className="hover:text-blue-600">
                   Seguridad
                 </Link>
 
@@ -75,10 +69,8 @@ export default function RootLayout({
           </header>
         )}
 
-        {/* CONTENIDO */}
         <main className="relative">
 
-          {/* BACKGROUND */}
           <div className="absolute inset-0 -z-10">
 
             <div
