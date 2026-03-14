@@ -146,7 +146,7 @@ export default function UploadPage() {
 
         setTimeout(() => {
           router.push('/dashboard')
-          router.refresh()  
+          router.refresh()
         }, 1500)
 
       } else {
@@ -257,7 +257,6 @@ export default function UploadPage() {
 
               </label>
 
-              {/* 🔧 nombre del archivo formateado */}
               <span className="text-gray-600 text-lg truncate max-w-[220px]">
                 {formatFileName(fileName)}
               </span>
@@ -271,6 +270,82 @@ export default function UploadPage() {
             )}
 
           </label>
+
+
+          {/* TIPO DE DOCUMENTO */}
+
+          <label className="block text-lg font-semibold">
+
+            🧾 Tipo de documento
+
+            <select
+              name="docType"
+              ref={docTypeRef}
+              className="mt-2 w-full border rounded-lg p-3 text-lg"
+              onBlur={(e) => validateField('docType', e.target.value)}
+            >
+              <option value="">Seleccione tipo de documento</option>
+              <option value="Laboratorio">Laboratorio</option>
+              <option value="Radiografía">Radiografía</option>
+              <option value="Receta">Receta</option>
+              <option value="Otro">Otro</option>
+            </select>
+
+            {errors.docType && (
+              <p className="mt-2 text-red-700 font-semibold">
+                ⚠ {errors.docType}
+              </p>
+            )}
+
+          </label>
+
+
+          {/* HOSPITAL */}
+
+          <label className="block text-lg font-semibold">
+
+            🏥 Hospital o clínica
+
+            <input
+              type="text"
+              name="facility"
+              ref={facilityRef}
+              placeholder="Ej. Hospital Manatí Medical Center"
+              className="mt-2 w-full border rounded-lg p-3 text-lg"
+              onBlur={(e) => validateField('facility', e.target.value)}
+            />
+
+            {errors.facility && (
+              <p className="mt-2 text-red-700 font-semibold">
+                ⚠ {errors.facility}
+              </p>
+            )}
+
+          </label>
+
+
+          {/* FECHA */}
+
+          <label className="block text-lg font-semibold">
+
+            📅 Fecha del estudio
+
+            <input
+              type="date"
+              name="studyDate"
+              ref={dateRef}
+              className="mt-2 w-full border rounded-lg p-3 text-lg"
+              onBlur={(e) => validateField('studyDate', e.target.value)}
+            />
+
+            {errors.studyDate && (
+              <p className="mt-2 text-red-700 font-semibold">
+                ⚠ {errors.studyDate}
+              </p>
+            )}
+
+          </label>
+
 
           <button
             type="submit"
